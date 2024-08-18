@@ -179,6 +179,12 @@ function mousePressed() {
 	}
 }
 
+function touchEnded() {
+	if (state === 'back') {
+		state = 'dagger-out'
+	}
+}
+
 function windowResized() {
 	resizeCanvas(windowWidth, windowHeight);
 	cardCanvas.resizeCanvas(windowWidth, windowHeight);
