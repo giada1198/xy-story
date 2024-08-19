@@ -54,11 +54,18 @@ function preload() {
 }
 
 function setup() {
-	createCanvas(windowWidth, windowHeight);
-	cardCanvas = createGraphics(windowWidth, windowHeight, WEBGL);
+	is_mobile = (windowWidth <= 700) ? true : false;
+	let min_h;
+	if (is_mobile) {
+		min_h = Math.max(Math.min(500, windowWidth), 320)/card_front_mobile_img.width*card_front_mobile_img.height;
+	} else {
+		min_h = 700/card_front_desktop_img.width*card_front_desktop_img.height;
+	}
+	createCanvas(windowWidth, Math.max(min_h, windowHeight));
+	cardCanvas = createGraphics(windowWidth, Math.max(min_h, windowHeight), WEBGL);
+
 	cardCanvas.noStroke();
 
-	is_mobile = (windowWidth <= 700) ? true : false;
 	console.log(is_mobile, windowWidth);
 
 	button = createButton('中文');
@@ -82,7 +89,6 @@ function setup() {
 
 function draw() {
 	background(0);
-
 	cardCanvas.clear();
 	cardCanvas.push();
 	cardCanvas.translate(0, cardY, 0);
@@ -131,7 +137,7 @@ function draw() {
 	if (is_mobile) {
 		let w = Math.max(Math.min(500, windowWidth), 320);
 		let h = w*(card_front_mobile_img.height/card_front_mobile_img.width);
-
+		//
 		cardCanvas.texture(card_front_mobile_img);
 		cardCanvas.beginShape();
 		cardCanvas.vertex(-w/2, -h/2, 0, 0, 0);                          							// Top left corner
@@ -142,7 +148,7 @@ function draw() {
 	} else {
 		let w = 700;
 		let h = w*(card_front_desktop_img.height/card_front_desktop_img.width);
-
+		//
 		cardCanvas.texture(card_front_desktop_img);
 		cardCanvas.beginShape();
 		cardCanvas.vertex(-w/2, -h/2, 0, 0, 0);                         								// Top left corner
@@ -152,40 +158,31 @@ function draw() {
 		cardCanvas.endShape(CLOSE);
 	}
 
-
-
-
-
+	// Draw the back side of the card
 	if (is_mobile) {
 		let w = Math.max(Math.min(500, windowWidth), 320);
 		let h = w*(card_back_mobile_img.height/card_back_mobile_img.width);
-
+		//
 		cardCanvas.texture(card_back_mobile_img);
 		cardCanvas.beginShape();
 		cardCanvas.vertex(w/2, -h/2, -0.01, card_back_mobile_img.width, card_back_mobile_img.height);                          							// Top left corner
-		cardCanvas.vertex(-w/2, -h/2, -0.01, 0, card_back_mobile_img.height);               				// Top right corner
-		cardCanvas.vertex(-w/2, h/2, -0.01, 0, 0);	// Bottom right corner
-		cardCanvas.vertex(w/2, h/2, -0.01, card_back_mobile_img.width, 0);               				// Bottom left corner
+		cardCanvas.vertex(-w/2, -h/2, -0.01, 0, card_back_mobile_img.height);
+		cardCanvas.vertex(-w/2, h/2, -0.01, 0, 0);
+		cardCanvas.vertex(w/2, h/2, -0.01, card_back_mobile_img.width, 0);
 		cardCanvas.endShape(CLOSE);
 	} else {
 		let w = 700;
 		let h = w*(card_back_desktop_img.height/card_back_desktop_img.width);
-
+		//
 		cardCanvas.texture(card_back_desktop_img);
 		cardCanvas.beginShape();
-		cardCanvas.vertex(w/2, -h/2, -0.01, card_back_desktop_img.width, card_back_desktop_img.height);               // Top left corner
-		cardCanvas.vertex(-w/2, -h/2, -0.01, 0, card_back_desktop_img.height);                          // Top right corner
-		cardCanvas.vertex(-w/2, h/2, -0.01, 0, 0);               // Bottom right corner
-		cardCanvas.vertex(w/2, h/2, -0.01, card_back_desktop_img.width, 0);    // Bottom left corner
+		cardCanvas.vertex(w/2, -h/2, -0.01, card_back_desktop_img.width, card_back_desktop_img.height);
+		cardCanvas.vertex(-w/2, -h/2, -0.01, 0, card_back_desktop_img.height);
+		cardCanvas.vertex(-w/2, h/2, -0.01, 0, 0);
+		cardCanvas.vertex(w/2, h/2, -0.01, card_back_desktop_img.width, 0);
 		cardCanvas.endShape(CLOSE);
 	}
 
-
-
-
-
-
-	
 	let daggerOffset = 0;
 	if (daggerZ > 0) {
 		daggerOffset = Math.pow(1.3, daggerZ);
@@ -198,10 +195,10 @@ function draw() {
 	cardCanvas.tint(255, Math.max(0, 255-Math.pow(1.2, daggerZ)));
 	cardCanvas.texture(daggerImg);
 	cardCanvas.beginShape();
-	cardCanvas.vertex(-daggerImg.width/2, -daggerImg.height/2, 10, 0, 0);               // Top left corner
-	cardCanvas.vertex(daggerImg.width/2, -daggerImg.height/2, 10, daggerImg.width, 0);                          // Top right corner
-	cardCanvas.vertex(daggerImg.width/2, daggerImg.height/2, 10, daggerImg.width, daggerImg.height);               // Bottom right corner
-	cardCanvas.vertex(-daggerImg.width/2, daggerImg.height/2, 10, 0, daggerImg.height);    // Bottom left corner
+	cardCanvas.vertex(-daggerImg.width/2, -daggerImg.height/2, 10, 0, 0);
+	cardCanvas.vertex(daggerImg.width/2, -daggerImg.height/2, 10, daggerImg.width, 0);
+	cardCanvas.vertex(daggerImg.width/2, daggerImg.height/2, 10, daggerImg.width, daggerImg.height);
+	cardCanvas.vertex(-daggerImg.width/2, daggerImg.height/2, 10, 0, daggerImg.height);
 	cardCanvas.endShape(CLOSE);
 
 	cardCanvas.pop();
@@ -273,13 +270,15 @@ function touchEnded() {
 }
 
 function windowResized() {
-	resizeCanvas(windowWidth, windowHeight);
-	cardCanvas.resizeCanvas(windowWidth, windowHeight);
-	nextStepButton.position(windowWidth/2-150, windowHeight/2+138);
-
 	is_mobile = (windowWidth <= 700) ? true : false;
-
-
+	if (is_mobile) {
+		min_h = Math.max(Math.min(500, windowWidth), 320)/card_front_mobile_img.width*card_front_mobile_img.height;
+	} else {
+		min_h = 700/card_front_desktop_img.width*card_front_desktop_img.height;
+	}
+	resizeCanvas(windowWidth, Math.max(min,h, windowHeight));
+	cardCanvas.resizeCanvas(windowWidth, Math.max(min_h, windowHeight));
+	nextStepButton.position(windowWidth/2-150, Math.max(min_h, windowHeight)/2+138);
 }
 
 function setLanguage(l) {
