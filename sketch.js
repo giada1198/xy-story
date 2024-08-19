@@ -40,6 +40,8 @@ let card_back_mobile_img;
 
 let is_mobile;
 
+const survey_link = 'https://forms.gle/AvYd9YZ7U9vqC8Vx5';
+
 
 function preload() {
 	daggerImg = loadImage('assets/dagger.png');
@@ -256,8 +258,6 @@ function draw() {
 		button.position(width/2-button.width-10, height / 2 - button.height / 2);
 		buttonEnglish.position(width/2+10, height / 2 - buttonEnglish.height / 2);
 	}
-
-	// console.log(cardOpacity);
 }
 
 // function mousePressed() {
@@ -265,7 +265,7 @@ function draw() {
 
 function touchEnded() {
 	if (nextStepButton.isClicked()) {
-		window.open("https://forms.gle/AvYd9YZ7U9vqC8Vx5");
+		window.open(survey_link);
 	}
 }
 
@@ -288,15 +288,14 @@ function setLanguage(l) {
 	buttonEnglish.hide();
 }
 
-
 class Button {
 	constructor(inImg, inX, inY, inWidth, inHeight) {
-	  this.x = inX;
-	  this.y = inY;
-	  this.width = inWidth;
-	  this.height = inHeight;
-	  this.img = inImg;
-	  this.opacity = 0;
+		this.x = inX;
+		this.y = inY;
+		this.width = inWidth;
+		this.height = inHeight;
+		this.img = inImg;
+		this.opacity = 0;
 	}
 	position(inX, inY) {
 		this.x = inX;
@@ -304,7 +303,6 @@ class Button {
 	}
 	display() {
 		stroke(0);
-		// tint the image on mouse hover
 		push();
 		if (this.over()) {
 			tint(170, 170, 170, this.opacity);
@@ -318,11 +316,11 @@ class Button {
 	// see this.img.width and this.img.height below
 	over() {
 	  if (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height) {
-		cursor('pointer')
-		return true;
+			cursor('pointer')
+			return true;
 	  } else {
-		cursor('default')
-		return false;
+			cursor('default')
+			return false;
 	  }
 	}
 	isClicked() {
