@@ -1,4 +1,4 @@
-let img;
+
 let angle = 0;
 let state = 'init';
 let cardCanvas;
@@ -33,18 +33,33 @@ let buttonEnglish;
 let nextStepButtonImg;
 let nextStepButton;
 
+let card_front_desktop_img;
+
+let card_front_mobile_img;
+let card_back_mobile_img;
+
+let is_mobile;
+
+
 function preload() {
-	img = loadImage('assets/ygs-test.png'); // Replace with the path to your image
-	img2 = loadImage('assets/ygs-test-3.png'); // Replace with the path to your image
 	daggerImg = loadImage('assets/dagger.png');
 	nextStepButtonImg = loadImage('assets/next-step-button.png');
+
+
+	card_front_desktop_img = loadImage('assets/ygs-test.png');
+	card_back_desktop_img = loadImage('assets/ygs-test-3.png');
+
+	card_front_mobile_img = loadImage('assets/card-front-mobile.png');
+	card_back_mobile_img = loadImage('assets/card-back-mobile.png');
 }
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
 	cardCanvas = createGraphics(windowWidth, windowHeight, WEBGL);
-	// cardCanvas.position(0, 0);
 	cardCanvas.noStroke();
+
+	is_mobile = (windowWidth <= 700) ? true : false;
+	console.log(is_mobile, windowWidth);
 
 	button = createButton('中文');
 	button.position(windowWidth/2-button.width-10, windowHeight/2 - button.height / 2);
@@ -71,7 +86,6 @@ function draw() {
 	cardCanvas.clear();
 	cardCanvas.push();
 	cardCanvas.translate(0, cardY, 0);
-	// console.log(cardY);
 
 	if (state === 'back') {
 
@@ -113,34 +127,64 @@ function draw() {
 	cardCanvas.rotateX(cardRotateX);
 	cardCanvas.rotateY(cardRotateY);
 
-	// console.log(img.width, img.height);
+	// Draw the front side of the card
+	if (is_mobile) {
+		let w = Math.max(Math.min(500, windowWidth), 320);
+		let h = w*(card_front_mobile_img.height/card_front_mobile_img.width);
 
-	// Set the plane's width and height based on the image's aspect ratio
+		cardCanvas.texture(card_front_mobile_img);
+		cardCanvas.beginShape();
+		cardCanvas.vertex(-w/2, -h/2, 0, 0, 0);                          							// Top left corner
+		cardCanvas.vertex(w/2, -h/2, 0, card_front_mobile_img.width, 0);               				// Top right corner
+		cardCanvas.vertex(w/2, h/2, 0, card_front_mobile_img.width, card_front_mobile_img.height);	// Bottom right corner
+		cardCanvas.vertex(-w/2, h/2, 0, 0, card_front_mobile_img.height);               			// Bottom left corner
+		cardCanvas.endShape(CLOSE);
+	} else {
+		let w = 700;
+		let h = w*(card_front_desktop_img.height/card_front_desktop_img.width);
+
+		cardCanvas.texture(card_front_desktop_img);
+		cardCanvas.beginShape();
+		cardCanvas.vertex(-w/2, -h/2, 0, 0, 0);                         								// Top left corner
+		cardCanvas.vertex(w/2, -h/2, 0, card_front_desktop_img.width, 0);               				// Top right corner
+		cardCanvas.vertex(w/2, h/2, 0, card_front_desktop_img.width, card_front_desktop_img.height);	// Bottom right corner
+		cardCanvas.vertex(-w/2, h/2, 0, 0, card_front_desktop_img.height);          				    // Bottom left corner
+		cardCanvas.endShape(CLOSE);
+	}
 
 
-	let planeWidth = img.width;
-	let planeHeight = img.height; // Arbitrary height for the plane
 
 
-	
+
+	if (is_mobile) {
+		let w = Math.max(Math.min(500, windowWidth), 320);
+		let h = w*(card_back_mobile_img.height/card_back_mobile_img.width);
+
+		cardCanvas.texture(card_back_mobile_img);
+		cardCanvas.beginShape();
+		cardCanvas.vertex(w/2, -h/2, -0.01, card_back_mobile_img.width, card_back_mobile_img.height);                          							// Top left corner
+		cardCanvas.vertex(-w/2, -h/2, -0.01, 0, card_back_mobile_img.height);               				// Top right corner
+		cardCanvas.vertex(-w/2, h/2, -0.01, 0, 0);	// Bottom right corner
+		cardCanvas.vertex(w/2, h/2, -0.01, card_back_mobile_img.width, 0);               				// Bottom left corner
+		cardCanvas.endShape(CLOSE);
+	} else {
+		let w = 700;
+		let h = w*(card_back_desktop_img.height/card_back_desktop_img.width);
+
+		cardCanvas.texture(card_back_desktop_img);
+		cardCanvas.beginShape();
+		cardCanvas.vertex(w/2, -h/2, -0.01, card_back_desktop_img.width, card_back_desktop_img.height);               // Top left corner
+		cardCanvas.vertex(-w/2, -h/2, -0.01, 0, card_back_desktop_img.height);                          // Top right corner
+		cardCanvas.vertex(-w/2, h/2, -0.01, 0, 0);               // Bottom right corner
+		cardCanvas.vertex(w/2, h/2, -0.01, card_back_desktop_img.width, 0);    // Bottom left corner
+		cardCanvas.endShape(CLOSE);
+	}
 
 
-	// Draw the plane with the scaled texture to fit the entire image
-	cardCanvas.texture(img);
-	cardCanvas.beginShape();
-	cardCanvas.vertex(-planeWidth/2, -planeHeight/2, 0, 0, 0);                          // Top left corner
-	cardCanvas.vertex(planeWidth/2, -planeHeight/2, 0, img.width, 0);               // Top right corner
-	cardCanvas.vertex(planeWidth/2, planeHeight/2, 0, img.width, img.height);    // Bottom right corner
-	cardCanvas.vertex(-planeWidth/2, planeHeight/2, 0, 0, img.height);               // Bottom left corner
-	cardCanvas.endShape(CLOSE);
 
-	cardCanvas.texture(img2);
-	cardCanvas.beginShape();
-	cardCanvas.vertex(planeWidth/2, -planeHeight/2, -0.01, img2.width, img2.height);               // Top left corner
-	cardCanvas.vertex(-planeWidth/2, -planeHeight/2, -0.01, 0, img2.height);                          // Top right corner
-	cardCanvas.vertex(-planeWidth/2, planeHeight/2, -0.01, 0, 0);               // Bottom right corner
-	cardCanvas.vertex(planeWidth/2, planeHeight/2, -0.01, img2.width, 0);    // Bottom left corner
-	cardCanvas.endShape(CLOSE);
+
+
+
 	
 	let daggerOffset = 0;
 	if (daggerZ > 0) {
@@ -220,14 +264,11 @@ function draw() {
 }
 
 // function mousePressed() {
-// 	if (nextStepButton.clicked()) {
-// 		console.log('hello');
-// 	}
 // }
 
 function touchEnded() {
 	if (nextStepButton.isClicked()) {
-		window.open("https://mail.google.com");
+		window.open("https://forms.gle/AvYd9YZ7U9vqC8Vx5");
 	}
 }
 
@@ -235,6 +276,8 @@ function windowResized() {
 	resizeCanvas(windowWidth, windowHeight);
 	cardCanvas.resizeCanvas(windowWidth, windowHeight);
 	nextStepButton.position(windowWidth/2-150, windowHeight/2+138);
+
+	is_mobile = (windowWidth <= 700) ? true : false;
 
 
 }
