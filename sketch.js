@@ -17,7 +17,7 @@ let cardRotateY = 0;
 
 
 
-let cardY = 300;
+let cardY = 200;
 
 let cardWiggleX = 0;
 let cardWiggleXPositive = true;
@@ -29,10 +29,15 @@ let frontCountdown = 20;
 let button;
 let buttonEnglish;
 
+
+let nextStepButtonImg;
+let nextStepButton;
+
 function preload() {
 	img = loadImage('assets/ygs-test.png'); // Replace with the path to your image
 	img2 = loadImage('assets/ygs-test-3.png'); // Replace with the path to your image
-	daggerImg = loadImage('assets/dagger.png'); // Replace with the path to your image
+	daggerImg = loadImage('assets/dagger.png');
+	nextStepButtonImg = loadImage('assets/next-step-button.png');
 }
 
 function setup() {
@@ -42,40 +47,33 @@ function setup() {
 	cardCanvas.noStroke();
 
 	button = createButton('中文');
-	button.position(windowWidth/2-button.width-10, windowHeight / 2 - button.height / 2);
+	button.position(windowWidth/2-button.width-10, windowHeight/2 - button.height / 2);
 	button.mousePressed(() => {
 		setLanguage('chinese')
 	});
 
 	buttonEnglish = createButton('English');
-	buttonEnglish.position(windowWidth/2+10, windowHeight / 2 - buttonEnglish.height / 2);
+	buttonEnglish.position(windowWidth/2+10, windowHeight/2 - buttonEnglish.height / 2);
 	buttonEnglish.mousePressed(() => {
 		setLanguage('english')
 	});
 
 	button.style('cursor', 'pointer');
 	buttonEnglish.style('cursor', 'pointer');
+
+	
+	nextStepButton = new Button(nextStepButtonImg, windowWidth/2-150, windowHeight/2+138, 300, 54);
 }
 
 function draw() {
-	
-
-	// Rotate the plane for better visibility
-
 	background(0);
-
-	
-
-	
-
-	// cardCanvas.background(0);
 
 	cardCanvas.clear();
 	cardCanvas.push();
 	cardCanvas.translate(0, cardY, 0);
-	console.log(cardY);
+	// console.log(cardY);
 
-	if (state === 'turn-over') {
+	if (state === 'back') {
 
 		if (cardWiggleXPositive) {
 			cardWiggleX += (PI/72)/60;
@@ -104,7 +102,7 @@ function draw() {
 		cardCanvas.rotateX(cardWiggleX);
 		cardCanvas.rotateY(cardWiggleY);
 
-		if (state === 'turn-over') {
+		if (state === 'back') {
 			let x = map(mouseY, 0, height, -PI/36, PI/36);
 			let y = map(mouseX, 0, width, -PI/36, PI/36);
 			cardCanvas.rotateX(x);
@@ -112,15 +110,17 @@ function draw() {
 		}		
 	}
 
-	
 	cardCanvas.rotateX(cardRotateX);
 	cardCanvas.rotateY(cardRotateY);
 
 	// console.log(img.width, img.height);
 
 	// Set the plane's width and height based on the image's aspect ratio
-	let planeHeight = img.height; // Arbitrary height for the plane
+
+
 	let planeWidth = img.width;
+	let planeHeight = img.height; // Arbitrary height for the plane
+
 
 	
 
@@ -141,16 +141,15 @@ function draw() {
 	cardCanvas.vertex(-planeWidth/2, planeHeight/2, -0.01, 0, 0);               // Bottom right corner
 	cardCanvas.vertex(planeWidth/2, planeHeight/2, -0.01, img2.width, 0);    // Bottom left corner
 	cardCanvas.endShape(CLOSE);
-
-	// rotateY(angle);
 	
-	let daggerOffset = Math.pow(1.3, daggerZ);
+	let daggerOffset = 0;
+	if (daggerZ > 0) {
+		daggerOffset = Math.pow(1.3, daggerZ);
+	}
 
-	cardCanvas.translate(260+daggerOffset, -270-daggerOffset, 60+daggerOffset);
+	cardCanvas.translate(260+daggerOffset, -270-daggerOffset, 60+2*daggerOffset);
 	cardCanvas.rotateY(-PI/12);
 	cardCanvas.rotateZ(PI/4);
-
-	// console.log(255-Math.pow(1.2, daggerZ), daggerZ);
 
 	cardCanvas.tint(255, Math.max(0, 255-Math.pow(1.2, daggerZ)));
 	cardCanvas.texture(daggerImg);
@@ -189,25 +188,25 @@ function draw() {
 	} else if (state === 'dagger-out') {
 		image(cardCanvas, 0, 0);
 		daggerZ += 1;
-		if (daggerZ >= 30) {
+		if (daggerZ >= 40) {
 			state = 'turn-over';
 		}
 		cursor(ARROW);
 	} else if (state === 'turn-over') {
 		cardRotateX = Math.max(-PI, cardRotateX-=0.12);
 		cardRotateY = Math.min(2*PI, cardRotateY+=0.20);
-		// if windowWidth 
 		image(cardCanvas, 0, 0);
+		if (cardRotateX === -PI && cardRotateY === 2*PI) {
+			state = 'back'
+		}
+	} else if (state === 'back') {
+		image(cardCanvas, 0, 0);
+		if (nextStepButton.opacity <= 255) {
+			nextStepButton.opacity = Math.min(255, nextStepButton.opacity += 10);
+		}
+		nextStepButton.display();
 	}
-
 	
-
-
-	// fill(200);
-  	// textSize(32);
-  	// text('This is 2D', windowWidth/2, windowHeight/2);
-
-
 	if (language === 'unknown') {
 		// push();
 		// fill(0, 0, 0, 220);
@@ -221,20 +220,23 @@ function draw() {
 }
 
 // function mousePressed() {
-// 	if (state === 'front') {
-// 		state = 'dagger-out'
+// 	if (nextStepButton.clicked()) {
+// 		console.log('hello');
 // 	}
 // }
 
-// function touchEnded() {
-// 	if (state === 'front') {
-// 		state = 'dagger-out'
-// 	}
-// }
+function touchEnded() {
+	if (nextStepButton.isClicked()) {
+		window.open("https://mail.google.com");
+	}
+}
 
 function windowResized() {
 	resizeCanvas(windowWidth, windowHeight);
 	cardCanvas.resizeCanvas(windowWidth, windowHeight);
+	nextStepButton.position(windowWidth/2-150, windowHeight/2+138);
+
+
 }
 
 function setLanguage(l) {
@@ -243,3 +245,49 @@ function setLanguage(l) {
 	button.hide();
 	buttonEnglish.hide();
 }
+
+
+class Button {
+	constructor(inImg, inX, inY, inWidth, inHeight) {
+	  this.x = inX;
+	  this.y = inY;
+	  this.width = inWidth;
+	  this.height = inHeight;
+	  this.img = inImg;
+	  this.opacity = 0;
+	}
+	position(inX, inY) {
+		this.x = inX;
+		this.y = inY;
+	}
+	display() {
+		stroke(0);
+		// tint the image on mouse hover
+		push();
+		if (this.over()) {
+			tint(200, 200, 200, this.opacity);
+		} else {
+			tint(255, this.opacity);
+		}
+		image(this.img, this.x, this.y, this.width, this.height);
+		pop();
+	}
+	// over automatically matches the width & height of the image read from the file
+	// see this.img.width and this.img.height below
+	over() {
+	  if (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height) {
+		cursor('pointer')
+		return true;
+	  } else {
+		cursor('default')
+		return false;
+	  }
+	}
+	isClicked() {
+		if (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+  }
