@@ -1,28 +1,28 @@
 
 let angle = 0;
 let state = 'init';
-let cardCanvas;
+let canvas_3d;
 
-let cardOpacity = 1;
+let letterOpacity = 1;
 
 let language = 'unknown';
 
 let daggerZ = 0;
 
 
-// let cardRotateX = Math.PI/24;
-// let cardRotateY = Math.PI/24;
-let cardRotateX = 0;
-let cardRotateY = 0;
+// let letterRotateX = Math.PI/24;
+// let letterRotateY = Math.PI/24;
+let letterRotateX = 0;
+let letterRotateY = 0;
 
 
 
-let cardY = 150;
+let letterY = 150;
 
-let cardWiggleX = 0;
-let cardWiggleXPositive = true;
-let cardWiggleY = 0;
-let cardWiggleYPositive = true;
+let letterWiggleX = 0;
+let letterWiggleXPositive = true;
+let letterWiggleY = 0;
+let letterWiggleYPositive = true;
 
 let frontCountdown = 20;
 
@@ -30,13 +30,20 @@ let button;
 let buttonEnglish;
 
 
-let nextStepButtonImg;
-let nextStepButton;
 
-let card_front_desktop_img;
 
-let card_front_mobile_img;
-let card_back_mobile_img;
+let letter_front_desktop_img, letter_back_desktop_img;
+let letter_front_mobile_img, letter_back_mobile_img;
+
+let next_button_desktop, next_button_desktop_img;
+const next_button_desktop_img_w = 300;
+const next_button_desktop_img_h = 54;
+const next_button_desktop_y_offset = 138;
+
+let next_button_mobile, next_button_mobile_img;
+const next_button_mobile_img_w = 240;
+const next_button_mobile_img_h = 43;
+const next_button_mobile_y_offset = 134;
 
 let is_mobile;
 
@@ -44,33 +51,34 @@ const survey_link = 'https://forms.gle/AvYd9YZ7U9vqC8Vx5';
 
 
 function preload() {
+	// Letter
+	letter_front_desktop_img = loadImage('assets/ygs-test.png');
+	letter_back_desktop_img = loadImage('assets/ygs-test-3.png');
+	letter_front_mobile_img = loadImage('assets/letter-front-mobile.png');
+	letter_back_mobile_img = loadImage('assets/letter-back-mobile.png');
+	// Dagger
 	daggerImg = loadImage('assets/dagger.png');
-	nextStepButtonImg = loadImage('assets/next-step-button.png');
-
-
-	card_front_desktop_img = loadImage('assets/ygs-test.png');
-	card_back_desktop_img = loadImage('assets/ygs-test-3.png');
-
-	card_front_mobile_img = loadImage('assets/card-front-mobile.png');
-	card_back_mobile_img = loadImage('assets/card-back-mobile.png');
+	// Button
+	next_button_desktop_img = loadImage('assets/next-button-desktop.png');
+	next_button_mobile_img = loadImage('assets/next-button-mobile.png');
 }
 
 function setup() {
 	is_mobile = (windowWidth <= 700) ? true : false;
 	let min_h;
 	if (is_mobile) {
-		min_h = Math.max(Math.min(500, windowWidth), 320)/card_front_mobile_img.width*card_front_mobile_img.height;
+		min_h = Math.max(Math.min(500, windowWidth), 320)/letter_front_mobile_img.width*letter_front_mobile_img.height;
 	} else {
-		min_h = 700/card_front_desktop_img.width*card_front_desktop_img.height;
+		min_h = 700/letter_front_desktop_img.width*letter_front_desktop_img.height;
 	}
-	createCanvas(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
-	cardCanvas = createGraphics(Math.max(320, windowWidth), Math.max(min_h, windowHeight), WEBGL);
+	let w = Math.max(320, windowWidth);
+	let h = Math.max(min_h, windowHeight);
+	createCanvas(w, h);
+	canvas_3d = createGraphics(w, h, WEBGL);
+	console.log('w:', w, "h:", h);
 
-	console.log(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
 
-
-	cardCanvas.noStroke();
-
+	canvas_3d.noStroke();
 	button = createButton('中文');
 	button.position(windowWidth/2-button.width-10, windowHeight/2 - button.height / 2);
 	button.mousePressed(() => {
@@ -86,104 +94,101 @@ function setup() {
 	button.style('cursor', 'pointer');
 	buttonEnglish.style('cursor', 'pointer');
 
-	
-	nextStepButton = new Button(nextStepButtonImg, windowWidth/2-150, windowHeight/2+138, 300, 54);
+	let x = w/2-next_button_desktop_img_w/2;
+	let y = h/2+next_button_desktop_y_offset;
+	next_button_desktop = new Button(next_button_desktop_img, x, y, next_button_desktop_img_w, next_button_desktop_img_h);
+
+	let scale = Math.min(500, w)/320;
+	let button_w = next_button_mobile_img_w*scale;
+	let button_h = next_button_mobile_img_h*scale;
+	x = w/2-button_w/2;
+	y = h/2+next_button_mobile_y_offset*scale;
+	next_button_mobile = new Button(next_button_mobile_img, x, y, button_w, button_h);
 }
 
 function draw() {
 	background(0);
-	cardCanvas.clear();
-	cardCanvas.push();
-	cardCanvas.translate(0, cardY, 0);
+	canvas_3d.clear();
+	canvas_3d.push();
+	canvas_3d.translate(0, letterY, 0);
 
 	if (state === 'back') {
-
-		if (cardWiggleXPositive) {
-			cardWiggleX += (PI/72)/60;
-		} else {
-			cardWiggleX -= (PI/72)/60;
+		letterWiggleX = letterWiggleXPositive? letterWiggleX+(PI/72)/60 : letterWiggleX-(PI/72)/60;
+		letterWiggleY = letterWiggleYPositive? letterWiggleY+(PI/72)/80 : letterWiggleY-(PI/72)/80;
+		
+		if (letterWiggleX >= PI/60) {
+			letterWiggleXPositive = false;
+		} else if (letterWiggleX <= -PI/60) {
+			letterWiggleXPositive = true;
 		}
 
-		if (cardWiggleYPositive) {
-			cardWiggleY += (PI/60)/80;
-		} else {
-			cardWiggleY -= (PI/60)/80;
+		if (letterWiggleY >= PI/60) {
+			letterWiggleYPositive = false;
+		} else if (letterWiggleY <= -PI/60) {
+			letterWiggleYPositive = true;
 		}
 
-		if (cardWiggleX >= PI/60) {
-			cardWiggleXPositive = false;
-		} else if (cardWiggleX <= -PI/60) {
-			cardWiggleXPositive = true;
+		canvas_3d.rotateX(letterWiggleX);
+		canvas_3d.rotateY(letterWiggleY);
+
+		// Mouse tracking tilt effect on desktop
+		if (!is_mobile) {
+			canvas_3d.rotateX(map(mouseY, 0, height, -PI/36, PI/36));
+			canvas_3d.rotateY(map(mouseX, 0, width,  -PI/36, PI/36));
 		}
-
-		if (cardWiggleY >= PI/60) {
-			cardWiggleYPositive = false;
-		} else if (cardWiggleY <= -PI/60) {
-			cardWiggleYPositive = true;
-		}
-
-		cardCanvas.rotateX(cardWiggleX);
-		cardCanvas.rotateY(cardWiggleY);
-
-		if (state === 'back') {
-			let x = map(mouseY, 0, height, -PI/36, PI/36);
-			let y = map(mouseX, 0, width, -PI/36, PI/36);
-			cardCanvas.rotateX(x);
-			cardCanvas.rotateY(y);
-		}		
 	}
 
-	cardCanvas.rotateX(cardRotateX);
-	cardCanvas.rotateY(cardRotateY);
+	canvas_3d.rotateX(letterRotateX);
+	canvas_3d.rotateY(letterRotateY);
 
-	// Draw the front side of the card
+	// Draw the front side of the letter
 	if (is_mobile) {
 		let w = Math.max(Math.min(500, windowWidth), 320);
-		let h = w*(card_front_mobile_img.height/card_front_mobile_img.width);
+		let h = w*(letter_front_mobile_img.height/letter_front_mobile_img.width);
 		//
-		cardCanvas.texture(card_front_mobile_img);
-		cardCanvas.beginShape();
-		cardCanvas.vertex(-w/2, -h/2, 0, 0, 0);                          							// Top left corner
-		cardCanvas.vertex(w/2, -h/2, 0, card_front_mobile_img.width, 0);               				// Top right corner
-		cardCanvas.vertex(w/2, h/2, 0, card_front_mobile_img.width, card_front_mobile_img.height);	// Bottom right corner
-		cardCanvas.vertex(-w/2, h/2, 0, 0, card_front_mobile_img.height);               			// Bottom left corner
-		cardCanvas.endShape(CLOSE);
+		canvas_3d.texture(letter_front_mobile_img);
+		canvas_3d.beginShape();
+		canvas_3d.vertex(-w/2, -h/2, 0, 0, 0);                          							// Top left corner
+		canvas_3d.vertex(w/2, -h/2, 0, letter_front_mobile_img.width, 0);               				// Top right corner
+		canvas_3d.vertex(w/2, h/2, 0, letter_front_mobile_img.width, letter_front_mobile_img.height);	// Bottom right corner
+		canvas_3d.vertex(-w/2, h/2, 0, 0, letter_front_mobile_img.height);               			// Bottom left corner
+		canvas_3d.endShape(CLOSE);
 	} else {
 		let w = 700;
-		let h = w*(card_front_desktop_img.height/card_front_desktop_img.width);
+		let h = w*(letter_front_desktop_img.height/letter_front_desktop_img.width);
 		//
-		cardCanvas.texture(card_front_desktop_img);
-		cardCanvas.beginShape();
-		cardCanvas.vertex(-w/2, -h/2, 0, 0, 0);                         								// Top left corner
-		cardCanvas.vertex(w/2, -h/2, 0, card_front_desktop_img.width, 0);               				// Top right corner
-		cardCanvas.vertex(w/2, h/2, 0, card_front_desktop_img.width, card_front_desktop_img.height);	// Bottom right corner
-		cardCanvas.vertex(-w/2, h/2, 0, 0, card_front_desktop_img.height);          				    // Bottom left corner
-		cardCanvas.endShape(CLOSE);
+		canvas_3d.texture(letter_front_desktop_img);
+		canvas_3d.beginShape();
+		canvas_3d.vertex(-w/2, -h/2, 0, 0, 0);                         								// Top left corner
+		canvas_3d.vertex(w/2, -h/2, 0, letter_front_desktop_img.width, 0);               				// Top right corner
+		canvas_3d.vertex(w/2, h/2, 0, letter_front_desktop_img.width, letter_front_desktop_img.height);	// Bottom right corner
+		canvas_3d.vertex(-w/2, h/2, 0, 0, letter_front_desktop_img.height);          				    // Bottom left corner
+		canvas_3d.endShape(CLOSE);
 	}
 
-	// Draw the back side of the card
+	// Draw the back side of the letter
 	if (is_mobile) {
 		let w = Math.max(Math.min(500, windowWidth), 320);
-		let h = w*(card_back_mobile_img.height/card_back_mobile_img.width);
+		let h = w*(letter_back_mobile_img.height/letter_back_mobile_img.width);
 		//
-		cardCanvas.texture(card_back_mobile_img);
-		cardCanvas.beginShape();
-		cardCanvas.vertex(w/2, -h/2, -0.01, card_back_mobile_img.width, card_back_mobile_img.height);                          							// Top left corner
-		cardCanvas.vertex(-w/2, -h/2, -0.01, 0, card_back_mobile_img.height);
-		cardCanvas.vertex(-w/2, h/2, -0.01, 0, 0);
-		cardCanvas.vertex(w/2, h/2, -0.01, card_back_mobile_img.width, 0);
-		cardCanvas.endShape(CLOSE);
+		canvas_3d.texture(letter_back_mobile_img);
+		canvas_3d.beginShape();
+		canvas_3d.vertex(w/2, -h/2, -0.01, letter_back_mobile_img.width, letter_back_mobile_img.height);                          							// Top left corner
+		canvas_3d.vertex(-w/2, -h/2, -0.01, 0, letter_back_mobile_img.height);
+		canvas_3d.vertex(-w/2, h/2, -0.01, 0, 0);
+		canvas_3d.vertex(w/2, h/2, -0.01, letter_back_mobile_img.width, 0);
+		canvas_3d.endShape(CLOSE);
 	} else {
 		let w = 700;
-		let h = w*(card_back_desktop_img.height/card_back_desktop_img.width);
+		let h = w*(letter_back_desktop_img.height/letter_back_desktop_img.width);
 		//
-		cardCanvas.texture(card_back_desktop_img);
-		cardCanvas.beginShape();
-		cardCanvas.vertex(w/2, -h/2, -0.01, card_back_desktop_img.width, card_back_desktop_img.height);
-		cardCanvas.vertex(-w/2, -h/2, -0.01, 0, card_back_desktop_img.height);
-		cardCanvas.vertex(-w/2, h/2, -0.01, 0, 0);
-		cardCanvas.vertex(w/2, h/2, -0.01, card_back_desktop_img.width, 0);
-		cardCanvas.endShape(CLOSE);
+		canvas_3d.texture(letter_back_desktop_img);
+		canvas_3d.beginShape();
+		canvas_3d.vertex(w/2, -h/2, -0.01, letter_back_desktop_img.width, letter_back_desktop_img.height);
+		canvas_3d.vertex(-w/2, -h/2, -0.01, 0, letter_back_desktop_img.height);
+		canvas_3d.vertex(-w/2, h/2, -0.01, 0, 0);
+		canvas_3d.vertex(w/2, h/2, -0.01, letter_back_desktop_img.width, 0);
+		canvas_3d.endShape(CLOSE);
 	}
 
 	let daggerOffset = 0;
@@ -191,35 +196,34 @@ function draw() {
 		daggerOffset = Math.pow(1.3, daggerZ);
 	}
 
-	cardCanvas.translate(260+daggerOffset, -270-daggerOffset, 60+2*daggerOffset);
-	cardCanvas.rotateY(-PI/12);
-	cardCanvas.rotateZ(PI/4);
+	canvas_3d.translate(260+daggerOffset, -270-daggerOffset, 60+2*daggerOffset);
+	canvas_3d.rotateY(-PI/12);
+	canvas_3d.rotateZ(PI/4);
 
-	cardCanvas.tint(255, Math.max(0, 255-Math.pow(1.2, daggerZ)));
-	cardCanvas.texture(daggerImg);
-	cardCanvas.beginShape();
-	cardCanvas.vertex(-daggerImg.width/2, -daggerImg.height/2, 10, 0, 0);
-	cardCanvas.vertex(daggerImg.width/2, -daggerImg.height/2, 10, daggerImg.width, 0);
-	cardCanvas.vertex(daggerImg.width/2, daggerImg.height/2, 10, daggerImg.width, daggerImg.height);
-	cardCanvas.vertex(-daggerImg.width/2, daggerImg.height/2, 10, 0, daggerImg.height);
-	cardCanvas.endShape(CLOSE);
+	canvas_3d.tint(255, Math.max(0, 255-Math.pow(1.2, daggerZ)));
+	canvas_3d.texture(daggerImg);
+	canvas_3d.beginShape();
+	canvas_3d.vertex(-daggerImg.width/2, -daggerImg.height/2, 10, 0, 0);
+	canvas_3d.vertex(daggerImg.width/2, -daggerImg.height/2, 10, daggerImg.width, 0);
+	canvas_3d.vertex(daggerImg.width/2, daggerImg.height/2, 10, daggerImg.width, daggerImg.height);
+	canvas_3d.vertex(-daggerImg.width/2, daggerImg.height/2, 10, 0, daggerImg.height);
+	canvas_3d.endShape(CLOSE);
 
-	cardCanvas.pop();
+	canvas_3d.pop();
 
-	// cardCanvas.pop();
 
-	if (state === 'card-fade-in') {
-		cardOpacity += 2;
-		if (cardY <= 0) {
-			cardY = 0;
+	if (state === 'letter-fade-in') {
+		letterOpacity += 2;
+		if (letterY <= 0) {
+			letterY = 0;
 		} else {
-			cardY -= 1.5;
+			letterY -= 1.5;
 		}
 		push();
-		tint(255, 255, 255, cardOpacity);
-		image(cardCanvas, 0, 0);
+		tint(255, 255, 255, letterOpacity);
+		image(canvas_3d, 0, 0);
 		pop();
-		if (cardOpacity >= 255 && cardY === 0) {
+		if (letterOpacity >= 255 && letterY === 0) {
 			state = 'front';
 		}
 	} else if (state === 'front') {
@@ -228,27 +232,32 @@ function draw() {
 		if (frontCountdown <= 0) {
 			state = 'dagger-out';
 		}
-		image(cardCanvas, 0, 0);
+		image(canvas_3d, 0, 0);
 	} else if (state === 'dagger-out') {
-		image(cardCanvas, 0, 0);
+		image(canvas_3d, 0, 0);
 		daggerZ += 1;
 		if (daggerZ >= 40) {
 			state = 'turn-over';
 		}
 		cursor(ARROW);
 	} else if (state === 'turn-over') {
-		cardRotateX = Math.max(-PI, cardRotateX-=0.12);
-		cardRotateY = Math.min(2*PI, cardRotateY+=0.20);
-		image(cardCanvas, 0, 0);
-		if (cardRotateX === -PI && cardRotateY === 2*PI) {
+		letterRotateX = Math.max(-PI, letterRotateX-=0.12);
+		letterRotateY = Math.min(2*PI, letterRotateY+=0.20);
+		image(canvas_3d, 0, 0);
+		if (letterRotateX === -PI && letterRotateY === 2*PI) {
 			state = 'back'
 		}
 	} else if (state === 'back') {
-		image(cardCanvas, 0, 0);
-		if (nextStepButton.opacity <= 255) {
-			nextStepButton.opacity = Math.min(255, nextStepButton.opacity += 10);
+		image(canvas_3d, 0, 0);
+		if (next_button_desktop.opacity <= 255) {
+			next_button_desktop.opacity = Math.min(255, next_button_desktop.opacity += 10);
+			next_button_mobile.opacity = Math.min(255, next_button_mobile.opacity += 10);
 		}
-		nextStepButton.display();
+		if (is_mobile) {
+			next_button_mobile.display();
+		} else {
+			next_button_desktop.display();
+		}
 	}
 
 	if (language === 'unknown') {
@@ -265,28 +274,45 @@ function draw() {
 // }
 
 function touchEnded() {
-	if (nextStepButton.isClicked()) {
+	if (next_button_desktop.isClicked() || next_button_mobile.isClicked()) {
 		window.open(survey_link);
 	}
 }
 
 function windowResized() {
 	is_mobile = (windowWidth <= 700) ? true : false;
+	let min_h;
 	if (is_mobile) {
-		min_h = Math.max(Math.min(500, windowWidth), 320)/card_front_mobile_img.width*card_front_mobile_img.height;
+		min_h = Math.max(Math.min(500, windowWidth), 320)/letter_front_mobile_img.width*letter_front_mobile_img.height;
 	} else {
-		min_h = 700/card_front_desktop_img.width*card_front_desktop_img.height;
+		min_h = 700/letter_front_desktop_img.width*letter_front_desktop_img.height;
 	}
-	resizeCanvas(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
-	cardCanvas.resizeCanvas(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
-	nextStepButton.position(windowWidth/2-150, Math.max(min_h, windowHeight)/2+138);
+	let w = Math.max(320, windowWidth);
+	let h = Math.max(min_h, windowHeight);
 
-	console.log(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
+	resizeCanvas(w, h);
+	canvas_3d.resizeCanvas(w, h);
+	
+	if (is_mobile) {
+		let scale = Math.min(500, w)/320;
+		let button_w = next_button_mobile_img_w*scale;
+		let button_h = next_button_mobile_img_h*scale;
+		let x = w/2-button_w/2;
+		let y = h/2+next_button_mobile_y_offset*scale;
+		next_button_mobile.position(x, y);
+		next_button_mobile.size(button_w, button_h);
+	} else {
+		let x = w/2-next_button_desktop_img_w/2;
+		let y = h/2+next_button_desktop_y_offset;
+		next_button_desktop.position(x, y);
+	}
+
+	console.log('w:', w, "h:", h);
 }
 
 function setLanguage(l) {
 	language = l;
-	state = 'card-fade-in';
+	state = 'letter-fade-in';
 	button.hide();
 	buttonEnglish.hide();
 }
@@ -303,6 +329,10 @@ class Button {
 	position(inX, inY) {
 		this.x = inX;
 		this.y = inY;
+	}
+	size(inWidth, inHeight) {
+		this.width = inWidth;
+		this.height = inHeight;	
 	}
 	display() {
 		stroke(0);
