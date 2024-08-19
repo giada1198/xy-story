@@ -17,7 +17,7 @@ let cardRotateY = 0;
 
 
 
-let cardY = 200;
+let cardY = 150;
 
 let cardWiggleX = 0;
 let cardWiggleXPositive = true;
@@ -165,11 +165,11 @@ function draw() {
 	// cardCanvas.pop();
 
 	if (state === 'card-fade-in') {
-		cardOpacity += 1.5
+		cardOpacity += 2;
 		if (cardY <= 0) {
 			cardY = 0;
 		} else {
-			cardY -= 2.5;
+			cardY -= 1.5;
 		}
 		push();
 		tint(255, 255, 255, cardOpacity);
@@ -206,7 +206,7 @@ function draw() {
 		}
 		nextStepButton.display();
 	}
-	
+
 	if (language === 'unknown') {
 		// push();
 		// fill(0, 0, 0, 220);
@@ -265,7 +265,7 @@ class Button {
 		// tint the image on mouse hover
 		push();
 		if (this.over()) {
-			tint(200, 200, 200, this.opacity);
+			tint(170, 170, 170, this.opacity);
 		} else {
 			tint(255, this.opacity);
 		}
