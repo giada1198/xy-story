@@ -63,12 +63,13 @@ function setup() {
 	} else {
 		min_h = 700/card_front_desktop_img.width*card_front_desktop_img.height;
 	}
-	createCanvas(windowWidth, Math.max(min_h, windowHeight));
-	cardCanvas = createGraphics(windowWidth, Math.max(min_h, windowHeight), WEBGL);
+	createCanvas(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
+	cardCanvas = createGraphics(Math.max(320, windowWidth), Math.max(min_h, windowHeight), WEBGL);
+
+	console.log(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
+
 
 	cardCanvas.noStroke();
-
-	console.log(is_mobile, windowWidth);
 
 	button = createButton('中文');
 	button.position(windowWidth/2-button.width-10, windowHeight/2 - button.height / 2);
@@ -276,9 +277,11 @@ function windowResized() {
 	} else {
 		min_h = 700/card_front_desktop_img.width*card_front_desktop_img.height;
 	}
-	resizeCanvas(windowWidth, Math.max(min,h, windowHeight));
-	cardCanvas.resizeCanvas(windowWidth, Math.max(min_h, windowHeight));
+	resizeCanvas(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
+	cardCanvas.resizeCanvas(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
 	nextStepButton.position(windowWidth/2-150, Math.max(min_h, windowHeight)/2+138);
+
+	console.log(Math.max(320, windowWidth), Math.max(min_h, windowHeight));
 }
 
 function setLanguage(l) {
