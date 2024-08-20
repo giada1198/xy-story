@@ -149,18 +149,18 @@ function draw() {
 	canvas_3d.translate(0, letterY, 0);
 
 	if (state === 'back') {
-		letterWiggleX = letterWiggleXPositive? letterWiggleX+(PI/72)/60 : letterWiggleX-(PI/72)/60;
-		letterWiggleY = letterWiggleYPositive? letterWiggleY+(PI/72)/80 : letterWiggleY-(PI/72)/80;
+		letterWiggleX = letterWiggleXPositive? letterWiggleX+(PI/48)/60 : letterWiggleX-(PI/48)/60;
+		letterWiggleY = letterWiggleYPositive? letterWiggleY+(PI/48)/80 : letterWiggleY-(PI/48)/80;
 		
-		if (letterWiggleX >= PI/60) {
+		if (letterWiggleX >= PI/48) {
 			letterWiggleXPositive = false;
-		} else if (letterWiggleX <= -PI/60) {
+		} else if (letterWiggleX <= -PI/48) {
 			letterWiggleXPositive = true;
 		}
 
-		if (letterWiggleY >= PI/60) {
+		if (letterWiggleY >= PI/48) {
 			letterWiggleYPositive = false;
-		} else if (letterWiggleY <= -PI/60) {
+		} else if (letterWiggleY <= -PI/48) {
 			letterWiggleYPositive = true;
 		}
 
@@ -169,8 +169,8 @@ function draw() {
 
 		// Mouse tracking tilt effect on desktop
 		if (!is_mobile) {
-			canvas_3d.rotateX(map(mouseY, 0, height, -PI/36, PI/36));
-			canvas_3d.rotateY(map(mouseX, 0, width,  -PI/36, PI/36));
+			canvas_3d.rotateX(map(mouseY, 0, height, -PI/48, PI/48));
+			canvas_3d.rotateY(map(mouseX, 0, width,  -PI/48, PI/48));
 		}
 	}
 
@@ -316,6 +316,11 @@ function draw() {
 			next_button_mobile.display();
 		} else {
 			next_button_desktop.display();
+			if (next_button_desktop.over()) {
+				cursor('pointer');
+			} else {
+				cursor('default');
+			}
 		}
 	}
 
@@ -401,7 +406,6 @@ class Button {
 		this.height = inHeight;	
 	}
 	display() {
-		console.log(this.opacity);
 		stroke(0);
 		push();
 		if (this.over()) {
