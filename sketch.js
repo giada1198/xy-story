@@ -344,15 +344,7 @@ function windowResized() {
 		let y = h/2+next_button_desktop_y_offset;
 		next_button_desktop.position(x, y);
 	}
-
-	console.log('w:', w, "h:", h);
-}
-
-function setLanguage(l) {
-	language = l;
-	state = 'letter-fade-in';
-	button.hide();
-	buttonEnglish.hide();
+	// console.log('w:', w, "h:", h);
 }
 
 class Button {
@@ -373,6 +365,7 @@ class Button {
 		this.width = inWidth;
 		this.height = inHeight;	
 	}
+
 	display() {
 		stroke(0);
 		push();
@@ -388,13 +381,15 @@ class Button {
 		}
 		pop();
 	}
+
 	over() {
 	  if ((mouseX > this.x) && (mouseX < this.x+this.width) && (mouseY > this.y) && (mouseY < this.y+this.height)) {
 			return true;
-	  } else {
+		} else {
 			return false;
-	  }
+		}
 	}
+
 	isClicked() {
 		if ((mouseX > this.x) && (mouseX < this.x+this.width) && (mouseY > this.y) && (mouseY < this.y+this.height)) {
 			return true;
