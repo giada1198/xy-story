@@ -6,6 +6,7 @@ let canvas_3d;
 
 let letter_front_desktop_img, letter_back_desktop_img, letter_back_desktop_en_img;
 let letter_front_mobile_img, letter_back_mobile_img;
+let dagger_img;
 
 let language_button_tc, language_button_tc_img;
 const language_button_tc_img_w = 150;
@@ -50,7 +51,7 @@ function preload() {
 	letter_back_mobile_img = loadImage('assets/letter-back-mobile.png');
 	letter_back_mobile_en_img = loadImage('assets/letter-back-mobile-en.png');
 	// dagger
-	daggerImg = loadImage('assets/dagger.png');
+	dagger_img = loadImage('assets/dagger.png');
 	// button
 	language_button_tc_img = loadImage('assets/language-button-tc.png');
 	language_button_en_img = loadImage('assets/language-button-en.png');
@@ -171,12 +172,12 @@ function draw() {
 	canvas_3d.rotateZ(PI/4);
 
 	canvas_3d.tint(255, Math.max(0, 255-Math.pow(1.2, dagger_z)));
-	canvas_3d.texture(daggerImg);
+	canvas_3d.texture(dagger_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(-daggerImg.width/2, -daggerImg.height/2, 10, 0, 0);
-	canvas_3d.vertex(daggerImg.width/2, -daggerImg.height/2, 10, daggerImg.width, 0);
-	canvas_3d.vertex(daggerImg.width/2, daggerImg.height/2, 10, daggerImg.width, daggerImg.height);
-	canvas_3d.vertex(-daggerImg.width/2, daggerImg.height/2, 10, 0, daggerImg.height);
+	canvas_3d.vertex(-dagger_img.width/2, -dagger_img.height/2, 10, 0, 0);
+	canvas_3d.vertex(dagger_img.width/2, -dagger_img.height/2, 10, dagger_img.width, 0);
+	canvas_3d.vertex(dagger_img.width/2, dagger_img.height/2, 10, dagger_img.width, dagger_img.height);
+	canvas_3d.vertex(-dagger_img.width/2, dagger_img.height/2, 10, 0, dagger_img.height);
 	canvas_3d.endShape(CLOSE);
 
 	canvas_3d.pop();
@@ -240,30 +241,6 @@ function draw() {
 			state = 'back'
 		}
 	} else if (state === 'back') {
-
-
-
-
-
-		image(canvas_3d, 0, 0);
-		if (next_button_desktop.opacity <= 255) {
-			next_button_desktop.opacity = Math.min(255, next_button_desktop.opacity += 10);
-			next_button_mobile.opacity = Math.min(255, next_button_mobile.opacity += 10);
-		}
-		if (is_mobile) {
-			next_button_mobile.display();
-		} else {
-			next_button_desktop.display();
-			if (next_button_desktop.is_hovered()) {
-				cursor('pointer');
-			} else {
-				cursor('default');
-			}
-		}
-	}
-
-
-	if (state === 'back') {
 		letter_tilt_x = letter_tilt_x_forward ? letter_tilt_x+(PI/48)/60 : letter_tilt_x-(PI/48)/60;
 		letter_tilt_y = letter_tilt_y_forward ? letter_tilt_y+(PI/48)/80 : letter_tilt_y-(PI/48)/80;
 		
@@ -286,6 +263,23 @@ function draw() {
 		if (!is_mobile) {
 			canvas_3d.rotateX(map(mouseY, 0, height, -PI/48, PI/48));
 			canvas_3d.rotateY(map(mouseX, 0, width,  -PI/48, PI/48));
+		}
+
+		image(canvas_3d, 0, 0);
+		
+		if (next_button_desktop.opacity <= 255) {
+			next_button_desktop.opacity = Math.min(255, next_button_desktop.opacity += 10);
+			next_button_mobile.opacity = Math.min(255, next_button_mobile.opacity += 10);
+		}
+		if (is_mobile) {
+			next_button_mobile.display();
+		} else {
+			next_button_desktop.display();
+			if (next_button_desktop.is_hovered()) {
+				cursor('pointer');
+			} else {
+				cursor('default');
+			}
 		}
 	}
 }
