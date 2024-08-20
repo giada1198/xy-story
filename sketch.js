@@ -5,17 +5,12 @@ let canvas_3d;
 
 let letterOpacity = 1;
 
-let language = 'unknown';
+let language = 'tc';
 
 let daggerZ = 0;
 
-
-// let letterRotateX = Math.PI/24;
-// let letterRotateY = Math.PI/24;
 let letterRotateX = 0;
 let letterRotateY = 0;
-
-
 
 let letterY = 150;
 
@@ -26,13 +21,8 @@ let letterWiggleYPositive = true;
 
 let frontCountdown = 20;
 
-let button;
-let buttonEnglish;
-
-let letter_front_desktop_img, letter_back_desktop_img;
+let letter_front_desktop_img, letter_back_desktop_img, letter_back_desktop_en_img;
 let letter_front_mobile_img, letter_back_mobile_img;
-
-
 
 let language_button_tc, language_button_tc_img;
 const language_button_tc_img_w = 150;
@@ -42,17 +32,12 @@ let language_button_en, language_button_en_img;
 const language_button_en_img_w = 150;
 const language_button_en_img_h = 60;
 
-
-
-
-
-
-let next_button_desktop, next_button_desktop_img;
+let next_button_desktop, next_button_desktop_img, next_button_desktop_en_img;
 const next_button_desktop_img_w = 300;
 const next_button_desktop_img_h = 54;
 const next_button_desktop_y_offset = 138;
 
-let next_button_mobile, next_button_mobile_img;
+let next_button_mobile, next_button_mobile_img, next_button_mobile_en_img;
 const next_button_mobile_img_w = 240;
 const next_button_mobile_img_h = 43;
 const next_button_mobile_y_offset = 134;
@@ -61,20 +46,23 @@ let is_mobile;
 
 const survey_link = 'https://forms.gle/AvYd9YZ7U9vqC8Vx5';
 
-
 function preload() {
 	// Letter
-	letter_front_desktop_img = loadImage('assets/ygs-test.png');
-	letter_back_desktop_img = loadImage('assets/ygs-test-3.png');
+	letter_front_desktop_img = loadImage('assets/letter-front-desktop.png');
+	letter_back_desktop_img = loadImage('assets/letter-back-desktop.png');
+	letter_back_desktop_en_img = loadImage('assets/letter-back-desktop-en.png');
 	letter_front_mobile_img = loadImage('assets/letter-front-mobile.png');
 	letter_back_mobile_img = loadImage('assets/letter-back-mobile.png');
+	letter_back_mobile_en_img = loadImage('assets/letter-back-mobile-en.png');
 	// Dagger
 	daggerImg = loadImage('assets/dagger.png');
 	// Button
 	language_button_tc_img = loadImage('assets/language-button-tc.png');
 	language_button_en_img = loadImage('assets/language-button-en.png');
 	next_button_desktop_img = loadImage('assets/next-button-desktop.png');
+	next_button_desktop_en_img = loadImage('assets/next-button-desktop-en.png');
 	next_button_mobile_img = loadImage('assets/next-button-mobile.png');
+	next_button_mobile_en_img = loadImage('assets/next-button-mobile-en.png');
 }
 
 function setup() {
@@ -91,43 +79,22 @@ function setup() {
 
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
-
-
-
-
-
-
-
 	canvas_3d.noStroke();
-	// button = createButton('中文');
-	// button.position(windowWidth/2-button.width-10, windowHeight/2 - button.height / 2);
-	// button.mousePressed(() => {
-	// 	setLanguage('chinese')
-	// });
-
-	// buttonEnglish = createButton('English');
-	// buttonEnglish.position(windowWidth/2+10, windowHeight/2 - buttonEnglish.height / 2);
-	// buttonEnglish.mousePressed(() => {
-	// 	setLanguage('english')
-	// });
-
-	// button.style('cursor', 'pointer');
-	// buttonEnglish.style('cursor', 'pointer');
 
 	// create chinese language button
 	let x = w/2-language_button_tc_img_w;
 	let y = h/2-language_button_tc_img_h/2;
-	language_button_tc = new Button(language_button_tc_img, x, y, language_button_tc_img_w, language_button_tc_img_h);
+	language_button_tc = new Button(language_button_tc_img, language_button_tc_img, x, y, language_button_tc_img_w, language_button_tc_img_h);
 	
 	// create english language button
 	x = w/2;
 	y = h/2-language_button_en_img_h/2;
-	language_button_en = new Button(language_button_en_img, x, y, language_button_en_img_w, language_button_en_img_h);
+	language_button_en = new Button(language_button_en_img, language_button_en_img, x, y, language_button_en_img_w, language_button_en_img_h);
 	
 	// create next button on desktop
 	x = w/2-next_button_desktop_img_w/2;
 	y = h/2+next_button_desktop_y_offset;
-	next_button_desktop = new Button(next_button_desktop_img, x, y, next_button_desktop_img_w, next_button_desktop_img_h);
+	next_button_desktop = new Button(next_button_desktop_img, next_button_desktop_en_img, x, y, next_button_desktop_img_w, next_button_desktop_img_h);
 	
 	// create next button on mobile
 	let scale = Math.min(500, w)/320;
@@ -135,11 +102,7 @@ function setup() {
 	let button_h = next_button_mobile_img_h*scale;
 	x = w/2-button_w/2;
 	y = h/2+next_button_mobile_y_offset*scale;
-	next_button_mobile = new Button(next_button_mobile_img, x, y, button_w, button_h);
-
-
-
-
+	next_button_mobile = new Button(next_button_mobile_img, next_button_mobile_en_img, x, y, button_w, button_h);
 }
 
 function draw() {
@@ -207,7 +170,11 @@ function draw() {
 		let w = Math.max(Math.min(500, windowWidth), 320);
 		let h = w*(letter_back_mobile_img.height/letter_back_mobile_img.width);
 		//
-		canvas_3d.texture(letter_back_mobile_img);
+		if (language === 'en') {
+			canvas_3d.texture(letter_back_mobile_en_img);
+		} else {
+			canvas_3d.texture(letter_back_mobile_img);
+		}
 		canvas_3d.beginShape();
 		canvas_3d.vertex(w/2, -h/2, -0.01, letter_back_mobile_img.width, letter_back_mobile_img.height);                          							// Top left corner
 		canvas_3d.vertex(-w/2, -h/2, -0.01, 0, letter_back_mobile_img.height);
@@ -218,7 +185,11 @@ function draw() {
 		let w = 700;
 		let h = w*(letter_back_desktop_img.height/letter_back_desktop_img.width);
 		//
-		canvas_3d.texture(letter_back_desktop_img);
+		if (language === 'en') {
+			canvas_3d.texture(letter_back_desktop_en_img);
+		} else {
+			canvas_3d.texture(letter_back_desktop_img);
+		}
 		canvas_3d.beginShape();
 		canvas_3d.vertex(w/2, -h/2, -0.01, letter_back_desktop_img.width, letter_back_desktop_img.height);
 		canvas_3d.vertex(-w/2, -h/2, -0.01, 0, letter_back_desktop_img.height);
@@ -323,15 +294,6 @@ function draw() {
 			}
 		}
 	}
-
-	// if (language === 'unknown') {
-	// 	// push();
-	// 	// fill(0, 0, 0, 220);
-	// 	// rect(0, 0, windowWidth, windowHeight);
-	// 	// pop();
-	// 	button.position(width/2-button.width-10, height / 2 - button.height / 2);
-	// 	buttonEnglish.position(width/2+10, height / 2 - buttonEnglish.height / 2);
-	// }
 }
 
 // function mousePressed() {
@@ -339,6 +301,11 @@ function draw() {
 
 function touchEnded() {
 	if (language_button_tc.isClicked()) {
+		language = 'tc';
+		state = 'language-buttons-fade-out';
+		cursor('default');
+	} else if (language_button_en.isClicked()) {
+		language = 'en';
 		state = 'language-buttons-fade-out';
 		cursor('default');
 	} else if (next_button_desktop.isClicked() || next_button_mobile.isClicked()) {
@@ -389,12 +356,13 @@ function setLanguage(l) {
 }
 
 class Button {
-	constructor(inImg, inX, inY, inWidth, inHeight) {
+	constructor(img, img_en, inX, inY, inWidth, inHeight) {
 		this.x = inX;
 		this.y = inY;
 		this.width = inWidth;
 		this.height = inHeight;
-		this.img = inImg;
+		this.img = img;
+		this.img_en = img_en;
 		this.opacity = 0;
 	}
 	position(inX, inY) {
@@ -413,22 +381,22 @@ class Button {
 		} else {
 			tint(255, this.opacity);
 		}
-		image(this.img, this.x, this.y, this.width, this.height);
+		if (language === 'en') {
+			image(this.img_en, this.x, this.y, this.width, this.height);
+		} else {
+			image(this.img, this.x, this.y, this.width, this.height);
+		}
 		pop();
 	}
-	// over automatically matches the width & height of the image read from the file
-	// see this.img.width and this.img.height below
 	over() {
-	  if (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height) {
-			// cursor('pointer');
+	  if ((mouseX > this.x) && (mouseX < this.x+this.width) && (mouseY > this.y) && (mouseY < this.y+this.height)) {
 			return true;
 	  } else {
-			// cursor('default');
 			return false;
 	  }
 	}
 	isClicked() {
-		if (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height) {
+		if ((mouseX > this.x) && (mouseX < this.x+this.width) && (mouseY > this.y) && (mouseY < this.y+this.height)) {
 			return true;
 		} else {
 			return false;
