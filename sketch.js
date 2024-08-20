@@ -29,11 +29,23 @@ let frontCountdown = 20;
 let button;
 let buttonEnglish;
 
-
-
-
 let letter_front_desktop_img, letter_back_desktop_img;
 let letter_front_mobile_img, letter_back_mobile_img;
+
+
+
+let language_button_tc, language_button_tc_img;
+const language_button_tc_img_w = 150;
+const language_button_tc_img_h = 60;
+
+let language_button_en, language_button_en_img;
+const language_button_en_img_w = 150;
+const language_button_en_img_h = 60;
+
+
+
+
+
 
 let next_button_desktop, next_button_desktop_img;
 const next_button_desktop_img_w = 300;
@@ -59,6 +71,8 @@ function preload() {
 	// Dagger
 	daggerImg = loadImage('assets/dagger.png');
 	// Button
+	language_button_tc_img = loadImage('assets/language-button-tc.png');
+	language_button_en_img = loadImage('assets/language-button-en.png');
 	next_button_desktop_img = loadImage('assets/next-button-desktop.png');
 	next_button_mobile_img = loadImage('assets/next-button-mobile.png');
 }
@@ -73,37 +87,59 @@ function setup() {
 	}
 	let w = Math.max(320, windowWidth);
 	let h = Math.max(min_h, windowHeight);
+	console.log('w:', w, "h:", h);
+
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
-	console.log('w:', w, "h:", h);
+
+
+
+
+
 
 
 	canvas_3d.noStroke();
-	button = createButton('中文');
-	button.position(windowWidth/2-button.width-10, windowHeight/2 - button.height / 2);
-	button.mousePressed(() => {
-		setLanguage('chinese')
-	});
+	// button = createButton('中文');
+	// button.position(windowWidth/2-button.width-10, windowHeight/2 - button.height / 2);
+	// button.mousePressed(() => {
+	// 	setLanguage('chinese')
+	// });
 
-	buttonEnglish = createButton('English');
-	buttonEnglish.position(windowWidth/2+10, windowHeight/2 - buttonEnglish.height / 2);
-	buttonEnglish.mousePressed(() => {
-		setLanguage('english')
-	});
+	// buttonEnglish = createButton('English');
+	// buttonEnglish.position(windowWidth/2+10, windowHeight/2 - buttonEnglish.height / 2);
+	// buttonEnglish.mousePressed(() => {
+	// 	setLanguage('english')
+	// });
 
-	button.style('cursor', 'pointer');
-	buttonEnglish.style('cursor', 'pointer');
+	// button.style('cursor', 'pointer');
+	// buttonEnglish.style('cursor', 'pointer');
 
-	let x = w/2-next_button_desktop_img_w/2;
-	let y = h/2+next_button_desktop_y_offset;
+	// create chinese language button
+	let x = w/2-language_button_tc_img_w;
+	let y = h/2-language_button_tc_img_h/2;
+	language_button_tc = new Button(language_button_tc_img, x, y, language_button_tc_img_w, language_button_tc_img_h);
+	
+	// create english language button
+	x = w/2;
+	y = h/2-language_button_en_img_h/2;
+	language_button_en = new Button(language_button_en_img, x, y, language_button_en_img_w, language_button_en_img_h);
+	
+	// create next button on desktop
+	x = w/2-next_button_desktop_img_w/2;
+	y = h/2+next_button_desktop_y_offset;
 	next_button_desktop = new Button(next_button_desktop_img, x, y, next_button_desktop_img_w, next_button_desktop_img_h);
-
+	
+	// create next button on mobile
 	let scale = Math.min(500, w)/320;
 	let button_w = next_button_mobile_img_w*scale;
 	let button_h = next_button_mobile_img_h*scale;
 	x = w/2-button_w/2;
 	y = h/2+next_button_mobile_y_offset*scale;
 	next_button_mobile = new Button(next_button_mobile_img, x, y, button_w, button_h);
+
+
+
+
 }
 
 function draw() {
@@ -211,8 +247,31 @@ function draw() {
 
 	canvas_3d.pop();
 
-
-	if (state === 'letter-fade-in') {
+	if (state === 'init') {
+		language_button_tc.display();
+		language_button_en.display();
+		language_button_tc.opacity += 10;
+		language_button_en.opacity = language_button_tc.opacity;
+		if (language_button_tc.opacity >= 255) {
+			state = 'language'
+		}
+	} else if (state === 'language') {
+		language_button_tc.display();
+		language_button_en.display();
+		if (language_button_tc.over() || language_button_en.over()) {
+			cursor('pointer');
+		} else {
+			cursor('default');
+		}
+	} else if (state === 'language-buttons-fade-out') {
+		language_button_tc.display();
+		language_button_en.display();
+		language_button_tc.opacity -= 10;
+		language_button_en.opacity = language_button_tc.opacity;
+		if (language_button_tc.opacity <= 0) {
+			state = 'letter-fade-in'
+		}
+	} else if (state === 'letter-fade-in') {
 		letterOpacity += 2;
 		if (letterY <= 0) {
 			letterY = 0;
@@ -260,21 +319,24 @@ function draw() {
 		}
 	}
 
-	if (language === 'unknown') {
-		// push();
-		// fill(0, 0, 0, 220);
-		// rect(0, 0, windowWidth, windowHeight);
-		// pop();
-		button.position(width/2-button.width-10, height / 2 - button.height / 2);
-		buttonEnglish.position(width/2+10, height / 2 - buttonEnglish.height / 2);
-	}
+	// if (language === 'unknown') {
+	// 	// push();
+	// 	// fill(0, 0, 0, 220);
+	// 	// rect(0, 0, windowWidth, windowHeight);
+	// 	// pop();
+	// 	button.position(width/2-button.width-10, height / 2 - button.height / 2);
+	// 	buttonEnglish.position(width/2+10, height / 2 - buttonEnglish.height / 2);
+	// }
 }
 
 // function mousePressed() {
 // }
 
 function touchEnded() {
-	if (next_button_desktop.isClicked() || next_button_mobile.isClicked()) {
+	if (language_button_tc.isClicked()) {
+		state = 'language-buttons-fade-out';
+		cursor('default');
+	} else if (next_button_desktop.isClicked() || next_button_mobile.isClicked()) {
 		window.open(survey_link);
 	}
 }
@@ -290,9 +352,13 @@ function windowResized() {
 	let w = Math.max(320, windowWidth);
 	let h = Math.max(min_h, windowHeight);
 
+	// reposition language buttons
+	language_button_tc.position(w/2-language_button_tc_img_w, h/2-language_button_tc_img_h/2);
+	language_button_en.position(w/2, h/2-language_button_en_img_h/2);
+
 	resizeCanvas(w, h);
 	canvas_3d.resizeCanvas(w, h);
-	
+	// reposition next button
 	if (is_mobile) {
 		let scale = Math.min(500, w)/320;
 		let button_w = next_button_mobile_img_w*scale;
@@ -335,6 +401,7 @@ class Button {
 		this.height = inHeight;	
 	}
 	display() {
+		console.log(this.opacity);
 		stroke(0);
 		push();
 		if (this.over()) {
@@ -349,10 +416,10 @@ class Button {
 	// see this.img.width and this.img.height below
 	over() {
 	  if (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height) {
-			cursor('pointer')
+			// cursor('pointer');
 			return true;
 	  } else {
-			cursor('default')
+			// cursor('default');
 			return false;
 	  }
 	}
