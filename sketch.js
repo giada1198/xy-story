@@ -130,7 +130,7 @@ function draw() {
 				canvas_3d.rotateY(map(mouseX, 0, width,  -PI/48, PI/48));
 			}
 		}
-		
+
 		// draw the front side of the letter
 		if (is_mobile) {
 			let w = Math.max(Math.min(500, windowWidth), 320);
@@ -266,10 +266,7 @@ function draw() {
 			state = 'back'
 		}
 	} else if (state === 'back') {
-
-
 		image(canvas_3d, 0, 0);
-		
 		if (next_button_desktop.opacity <= 255) {
 			next_button_desktop.opacity = Math.min(255, next_button_desktop.opacity += 10);
 			next_button_mobile.opacity = Math.min(255, next_button_mobile.opacity += 10);
