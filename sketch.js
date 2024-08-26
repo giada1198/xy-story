@@ -285,15 +285,15 @@ function draw() {
 }
 
 function touchEnded() {
-	if (language_button_tc.is_hovered()) {
+	if (state === 'language' && language_button_tc.is_hovered()) {
 		language = 'tc';
 		state = 'language-buttons-fade-out';
 		cursor('default');
-	} else if (language_button_en.is_hovered()) {
+	} else if (state === 'language' && language_button_en.is_hovered()) {
 		language = 'en';
 		state = 'language-buttons-fade-out';
 		cursor('default');
-	} else if (next_button_desktop.is_hovered() || next_button_mobile.is_hovered()) {
+	} else if (state === 'back' && (next_button_desktop.is_hovered() || next_button_mobile.is_hovered())) {
 		window.open(survey_link);
 	}
 }
