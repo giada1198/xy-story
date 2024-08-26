@@ -28,19 +28,18 @@ const next_button_mobile_y_offset = 134;
 
 const survey_link = 'https://forms.gle/AvYd9YZ7U9vqC8Vx5';
 
-let letter_opacity = 0;
 let front_countdown = 20;
 
+let letter_opacity = 0;
 let letter_y_offset = 150;
 let letter_rotate_x = 0;
 let letter_rotate_y = 0;
+let dagger_z = 0;
 
 let letter_tilt_x = 0;
 let letter_tilt_x_forward = true;
 let letter_tilt_y = 0;
 let letter_tilt_y_forward = true;
-
-let dagger_z = 0;
 
 function preload() {
 	// letter
@@ -204,7 +203,7 @@ function draw() {
 		canvas_3d.vertex(dagger_img.width/2, dagger_img.height/2, 10, dagger_img.width, dagger_img.height);
 		canvas_3d.vertex(-dagger_img.width/2, dagger_img.height/2, 10, 0, dagger_img.height);
 		canvas_3d.endShape(CLOSE);
-		
+
 		canvas_3d.pop();
 	}
 
