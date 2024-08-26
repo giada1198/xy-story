@@ -101,86 +101,111 @@ function setup() {
 
 function draw() {
 	background(0);
-	canvas_3d.clear();
-	canvas_3d.push();
-	canvas_3d.translate(0, letter_y_offset, 0);
-	canvas_3d.rotateX(letter_rotate_x);
-	canvas_3d.rotateY(letter_rotate_y);
 
-	// draw the front side of the letter
-	if (is_mobile) {
-		let w = Math.max(Math.min(500, windowWidth), 320);
-		let h = w*(letter_front_mobile_img.height/letter_front_mobile_img.width);
-		canvas_3d.texture(letter_front_mobile_img);
-		canvas_3d.beginShape();
-		canvas_3d.vertex(-w/2, -h/2, 0, 0, 0);                          								// Top left corner
-		canvas_3d.vertex(w/2, -h/2, 0, letter_front_mobile_img.width, 0);               				// Top right corner
-		canvas_3d.vertex(w/2, h/2, 0, letter_front_mobile_img.width, letter_front_mobile_img.height);	// Bottom right corner
-		canvas_3d.vertex(-w/2, h/2, 0, 0, letter_front_mobile_img.height);               				// Bottom left corner
-		canvas_3d.endShape(CLOSE);
-	} else {
-		let w = 700;
-		let h = w*(letter_front_desktop_img.height/letter_front_desktop_img.width);
-		canvas_3d.texture(letter_front_desktop_img);
-		canvas_3d.beginShape();
-		canvas_3d.vertex(-w/2, -h/2, 0, 0, 0);                         									// Top left corner
-		canvas_3d.vertex(w/2, -h/2, 0, letter_front_desktop_img.width, 0);               				// Top right corner
-		canvas_3d.vertex(w/2, h/2, 0, letter_front_desktop_img.width, letter_front_desktop_img.height);	// Bottom right corner
-		canvas_3d.vertex(-w/2, h/2, 0, 0, letter_front_desktop_img.height);          				    // Bottom left corner
-		canvas_3d.endShape(CLOSE);
-	}
+	if (state != 'init' && state != 'language' && state != 'language-buttons-fade-out') {
+		canvas_3d.clear();
+		canvas_3d.push();
+		canvas_3d.translate(0, letter_y_offset, 0);
+		canvas_3d.rotateX(letter_rotate_x);
+		canvas_3d.rotateY(letter_rotate_y);
 
-	// draw the back side of the letter
-	if (is_mobile) {
-		let w = Math.max(Math.min(500, windowWidth), 320);
-		let h = w*(letter_back_mobile_img.height/letter_back_mobile_img.width);
-		if (language === 'en') {
-			canvas_3d.texture(letter_back_mobile_en_img);
-		} else {
-			canvas_3d.texture(letter_back_mobile_img);
+		if (state === 'back') {
+			letter_tilt_x = letter_tilt_x_forward ? letter_tilt_x+(PI/48)/60 : letter_tilt_x-(PI/48)/60;
+			letter_tilt_y = letter_tilt_y_forward ? letter_tilt_y+(PI/48)/80 : letter_tilt_y-(PI/48)/80;
+			if (letter_tilt_x >= PI/48) {
+				letter_tilt_x_forward = false;
+			} else if (letter_tilt_x <= -PI/48) {
+				letter_tilt_x_forward = true;
+			}
+			if (letter_tilt_y >= PI/48) {
+				letter_tilt_y_forward = false;
+			} else if (letter_tilt_y <= -PI/48) {
+				letter_tilt_y_forward = true;
+			}
+			canvas_3d.rotateX(letter_tilt_x);
+			canvas_3d.rotateY(letter_tilt_y);
+			// mouse tracking tilt effect on desktop
+			if (!is_mobile) {
+				canvas_3d.rotateX(map(mouseY, 0, height, -PI/48, PI/48));
+				canvas_3d.rotateY(map(mouseX, 0, width,  -PI/48, PI/48));
+			}
 		}
-		canvas_3d.beginShape();
-		canvas_3d.vertex(w/2, -h/2, -0.01, letter_back_mobile_img.width, letter_back_mobile_img.height);                          							// Top left corner
-		canvas_3d.vertex(-w/2, -h/2, -0.01, 0, letter_back_mobile_img.height);
-		canvas_3d.vertex(-w/2, h/2, -0.01, 0, 0);
-		canvas_3d.vertex(w/2, h/2, -0.01, letter_back_mobile_img.width, 0);
-		canvas_3d.endShape(CLOSE);
-	} else {
-		let w = 700;
-		let h = w*(letter_back_desktop_img.height/letter_back_desktop_img.width);
-		//
-		if (language === 'en') {
-			canvas_3d.texture(letter_back_desktop_en_img);
+		
+		// draw the front side of the letter
+		if (is_mobile) {
+			let w = Math.max(Math.min(500, windowWidth), 320);
+			let h = w*(letter_front_mobile_img.height/letter_front_mobile_img.width);
+			canvas_3d.texture(letter_front_mobile_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(-w/2, -h/2, 0, 0, 0);                          								// Top left corner
+			canvas_3d.vertex(w/2, -h/2, 0, letter_front_mobile_img.width, 0);               				// Top right corner
+			canvas_3d.vertex(w/2, h/2, 0, letter_front_mobile_img.width, letter_front_mobile_img.height);	// Bottom right corner
+			canvas_3d.vertex(-w/2, h/2, 0, 0, letter_front_mobile_img.height);               				// Bottom left corner
+			canvas_3d.endShape(CLOSE);
 		} else {
-			canvas_3d.texture(letter_back_desktop_img);
+			let w = 700;
+			let h = w*(letter_front_desktop_img.height/letter_front_desktop_img.width);
+			canvas_3d.texture(letter_front_desktop_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(-w/2, -h/2, 0, 0, 0);                         									// Top left corner
+			canvas_3d.vertex(w/2, -h/2, 0, letter_front_desktop_img.width, 0);               				// Top right corner
+			canvas_3d.vertex(w/2, h/2, 0, letter_front_desktop_img.width, letter_front_desktop_img.height);	// Bottom right corner
+			canvas_3d.vertex(-w/2, h/2, 0, 0, letter_front_desktop_img.height);          				    // Bottom left corner
+			canvas_3d.endShape(CLOSE);
 		}
+
+		// draw the back side of the letter
+		if (is_mobile) {
+			let w = Math.max(Math.min(500, windowWidth), 320);
+			let h = w*(letter_back_mobile_img.height/letter_back_mobile_img.width);
+			if (language === 'en') {
+				canvas_3d.texture(letter_back_mobile_en_img);
+			} else {
+				canvas_3d.texture(letter_back_mobile_img);
+			}
+			canvas_3d.beginShape();
+			canvas_3d.vertex(w/2, -h/2, -0.01, letter_back_mobile_img.width, letter_back_mobile_img.height);                          							// Top left corner
+			canvas_3d.vertex(-w/2, -h/2, -0.01, 0, letter_back_mobile_img.height);
+			canvas_3d.vertex(-w/2, h/2, -0.01, 0, 0);
+			canvas_3d.vertex(w/2, h/2, -0.01, letter_back_mobile_img.width, 0);
+			canvas_3d.endShape(CLOSE);
+		} else {
+			let w = 700;
+			let h = w*(letter_back_desktop_img.height/letter_back_desktop_img.width);
+			//
+			if (language === 'en') {
+				canvas_3d.texture(letter_back_desktop_en_img);
+			} else {
+				canvas_3d.texture(letter_back_desktop_img);
+			}
+			canvas_3d.beginShape();
+			canvas_3d.vertex(w/2, -h/2, -0.01, letter_back_desktop_img.width, letter_back_desktop_img.height);
+			canvas_3d.vertex(-w/2, -h/2, -0.01, 0, letter_back_desktop_img.height);
+			canvas_3d.vertex(-w/2, h/2, -0.01, 0, 0);
+			canvas_3d.vertex(w/2, h/2, -0.01, letter_back_desktop_img.width, 0);
+			canvas_3d.endShape(CLOSE);
+		}
+
+		let daggerOffset = 0;
+		if (dagger_z > 0) {
+			daggerOffset = Math.pow(1.3, dagger_z);
+		}
+
+		canvas_3d.translate(260+daggerOffset, -270-daggerOffset, 60+2*daggerOffset);
+		canvas_3d.rotateY(-PI/12);
+		canvas_3d.rotateZ(PI/4);
+
+		canvas_3d.tint(255, Math.max(0, 255-Math.pow(1.2, dagger_z)));
+		canvas_3d.texture(dagger_img);
 		canvas_3d.beginShape();
-		canvas_3d.vertex(w/2, -h/2, -0.01, letter_back_desktop_img.width, letter_back_desktop_img.height);
-		canvas_3d.vertex(-w/2, -h/2, -0.01, 0, letter_back_desktop_img.height);
-		canvas_3d.vertex(-w/2, h/2, -0.01, 0, 0);
-		canvas_3d.vertex(w/2, h/2, -0.01, letter_back_desktop_img.width, 0);
+		canvas_3d.vertex(-dagger_img.width/2, -dagger_img.height/2, 10, 0, 0);
+		canvas_3d.vertex(dagger_img.width/2, -dagger_img.height/2, 10, dagger_img.width, 0);
+		canvas_3d.vertex(dagger_img.width/2, dagger_img.height/2, 10, dagger_img.width, dagger_img.height);
+		canvas_3d.vertex(-dagger_img.width/2, dagger_img.height/2, 10, 0, dagger_img.height);
 		canvas_3d.endShape(CLOSE);
+
+		canvas_3d.pop();
 	}
-
-	let daggerOffset = 0;
-	if (dagger_z > 0) {
-		daggerOffset = Math.pow(1.3, dagger_z);
-	}
-
-	canvas_3d.translate(260+daggerOffset, -270-daggerOffset, 60+2*daggerOffset);
-	canvas_3d.rotateY(-PI/12);
-	canvas_3d.rotateZ(PI/4);
-
-	canvas_3d.tint(255, Math.max(0, 255-Math.pow(1.2, dagger_z)));
-	canvas_3d.texture(dagger_img);
-	canvas_3d.beginShape();
-	canvas_3d.vertex(-dagger_img.width/2, -dagger_img.height/2, 10, 0, 0);
-	canvas_3d.vertex(dagger_img.width/2, -dagger_img.height/2, 10, dagger_img.width, 0);
-	canvas_3d.vertex(dagger_img.width/2, dagger_img.height/2, 10, dagger_img.width, dagger_img.height);
-	canvas_3d.vertex(-dagger_img.width/2, dagger_img.height/2, 10, 0, dagger_img.height);
-	canvas_3d.endShape(CLOSE);
-
-	canvas_3d.pop();
 
 	if (state === 'init') {
 		language_button_tc.display();
@@ -241,29 +266,7 @@ function draw() {
 			state = 'back'
 		}
 	} else if (state === 'back') {
-		letter_tilt_x = letter_tilt_x_forward ? letter_tilt_x+(PI/48)/60 : letter_tilt_x-(PI/48)/60;
-		letter_tilt_y = letter_tilt_y_forward ? letter_tilt_y+(PI/48)/80 : letter_tilt_y-(PI/48)/80;
-		
-		if (letter_tilt_x >= PI/48) {
-			letter_tilt_x_forward = false;
-		} else if (letter_tilt_x <= -PI/48) {
-			letter_tilt_x_forward = true;
-		}
 
-		if (letter_tilt_y >= PI/48) {
-			letter_tilt_y_forward = false;
-		} else if (letter_tilt_y <= -PI/48) {
-			letter_tilt_y_forward = true;
-		}
-
-		canvas_3d.rotateX(letter_tilt_x);
-		canvas_3d.rotateY(letter_tilt_y);
-
-		// Mouse tracking tilt effect on desktop
-		if (!is_mobile) {
-			canvas_3d.rotateX(map(mouseY, 0, height, -PI/48, PI/48));
-			canvas_3d.rotateY(map(mouseX, 0, width,  -PI/48, PI/48));
-		}
 
 		image(canvas_3d, 0, 0);
 		
