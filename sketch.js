@@ -50,8 +50,10 @@ function preload() {
 	letter_front_mobile_img = loadImage('assets/letter-front-mobile.png');
 	letter_back_mobile_img = loadImage('assets/letter-back-mobile.png');
 	letter_back_mobile_en_img = loadImage('assets/letter-back-mobile-en.png');
+	
 	// dagger
 	dagger_img = loadImage('assets/dagger.png');
+	
 	// button
 	language_button_tc_img = loadImage('assets/language-button-tc.png');
 	language_button_en_img = loadImage('assets/language-button-en.png');
@@ -74,7 +76,7 @@ function setup() {
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
 	canvas_3d.noStroke();
-
+	
 	// create chinese language button
 	let x = w/2-language_button_tc_img_w;
 	let y = h/2-language_button_tc_img_h/2;
@@ -124,6 +126,7 @@ function draw() {
 			}
 			canvas_3d.rotateX(letter_tilt_x);
 			canvas_3d.rotateY(letter_tilt_y);
+			
 			// mouse tracking tilt effect on desktop
 			if (!is_mobile) {
 				canvas_3d.rotateX(map(mouseY, 0, height, -PI/48, PI/48));
@@ -172,7 +175,6 @@ function draw() {
 		} else {
 			let w = 700;
 			let h = w*(letter_back_desktop_img.height/letter_back_desktop_img.width);
-			//
 			if (language === 'en') {
 				canvas_3d.texture(letter_back_desktop_en_img);
 			} else {
@@ -190,7 +192,6 @@ function draw() {
 		if (dagger_z > 0) {
 			daggerOffset = Math.pow(1.3, dagger_z);
 		}
-
 		canvas_3d.translate(260+daggerOffset, -270-daggerOffset, 60+2*daggerOffset);
 		canvas_3d.rotateY(-PI/12);
 		canvas_3d.rotateZ(PI/4);
@@ -203,7 +204,7 @@ function draw() {
 		canvas_3d.vertex(dagger_img.width/2, dagger_img.height/2, 10, dagger_img.width, dagger_img.height);
 		canvas_3d.vertex(-dagger_img.width/2, dagger_img.height/2, 10, 0, dagger_img.height);
 		canvas_3d.endShape(CLOSE);
-
+		
 		canvas_3d.pop();
 	}
 
