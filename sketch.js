@@ -111,8 +111,8 @@ function draw() {
 		canvas_3d.rotateY(letter_rotate_y);
 
 		if (state === 'back') {
-			letter_tilt_x = letter_tilt_x_forward ? letter_tilt_x+(PI/48)/60 : letter_tilt_x-(PI/48)/60;
-			letter_tilt_y = letter_tilt_y_forward ? letter_tilt_y+(PI/48)/80 : letter_tilt_y-(PI/48)/80;
+			letter_tilt_x = letter_tilt_x_forward ? letter_tilt_x+(PI/48)/80 : letter_tilt_x-(PI/48)/80;
+			letter_tilt_y = letter_tilt_y_forward ? letter_tilt_y+(PI/48)/100 : letter_tilt_y-(PI/48)/100;
 			if (letter_tilt_x >= PI/48) {
 				letter_tilt_x_forward = false;
 			} else if (letter_tilt_x <= -PI/48) {
