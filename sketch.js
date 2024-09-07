@@ -187,23 +187,40 @@ function draw() {
 			canvas_3d.endShape(CLOSE);
 		}
 
+		// draw the dagger
 		let daggerOffset = 0;
 		if (dagger_z > 0) {
 			daggerOffset = Math.pow(1.3, dagger_z);
 		}
-		canvas_3d.translate(260+daggerOffset, -270-daggerOffset, 60+2*daggerOffset);
-		canvas_3d.rotateY(-PI/12);
-		canvas_3d.rotateZ(PI/4);
 
-		canvas_3d.tint(255, Math.max(0, 255-Math.pow(1.2, dagger_z)));
-		canvas_3d.texture(dagger_img);
-		canvas_3d.beginShape();
-		canvas_3d.vertex(-dagger_img.width/2, -dagger_img.height/2, 10, 0, 0);
-		canvas_3d.vertex(dagger_img.width/2, -dagger_img.height/2, 10, dagger_img.width, 0);
-		canvas_3d.vertex(dagger_img.width/2, dagger_img.height/2, 10, dagger_img.width, dagger_img.height);
-		canvas_3d.vertex(-dagger_img.width/2, dagger_img.height/2, 10, 0, dagger_img.height);
-		canvas_3d.endShape(CLOSE);
-
+		if (is_mobile) {
+			let scale = Math.max(Math.min(500, windowWidth), 320)/500;
+			let w = dagger_img.width*scale;
+			let h = dagger_img.height*scale;
+			canvas_3d.translate((150*scale)+daggerOffset, (-150*scale)-daggerOffset, (30*scale)+0.25*daggerOffset);
+			canvas_3d.rotateY(-PI/12);
+			canvas_3d.rotateZ(PI/4);
+			canvas_3d.tint(255, Math.max(0, 255-Math.pow(1.2, dagger_z)));
+			canvas_3d.texture(dagger_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(-w/2, -h/2, scale*10, 0, 0);
+			canvas_3d.vertex(w/2, -h/2, scale*10, dagger_img.width, 0);
+			canvas_3d.vertex(w/2, h/2, scale*10, dagger_img.width, dagger_img.height);
+			canvas_3d.vertex(-w/2, h/2, scale*10, 0, dagger_img.height);
+			canvas_3d.endShape(CLOSE);
+		} else {
+			canvas_3d.translate(260+daggerOffset, -270-daggerOffset, 60+0.2*daggerOffset);
+			canvas_3d.rotateY(-PI/12);
+			canvas_3d.rotateZ(PI/4);
+			canvas_3d.tint(255, Math.max(0, 255-Math.pow(1.2, dagger_z)));
+			canvas_3d.texture(dagger_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(-dagger_img.width/2, -dagger_img.height/2, 10, 0, 0);
+			canvas_3d.vertex(dagger_img.width/2, -dagger_img.height/2, 10, dagger_img.width, 0);
+			canvas_3d.vertex(dagger_img.width/2, dagger_img.height/2, 10, dagger_img.width, dagger_img.height);
+			canvas_3d.vertex(-dagger_img.width/2, dagger_img.height/2, 10, 0, dagger_img.height);
+			canvas_3d.endShape(CLOSE);
+		}
 		canvas_3d.pop();
 	}
 
@@ -341,10 +358,12 @@ class Button {
 		this.img_en = img_en;
 		this.opacity = 0;
 	}
+
 	position(inX, inY) {
 		this.x = inX;
 		this.y = inY;
 	}
+
 	size(inWidth, inHeight) {
 		this.width = inWidth;
 		this.height = inHeight;	
