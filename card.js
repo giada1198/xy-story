@@ -19,6 +19,8 @@ let isTouching = false;
 let lastX, lastY;
 let lastTouchX, lastTouchY;
 
+let prevDist = -1;
+
 
 const dpi_multiple = 3;
 
@@ -145,6 +147,20 @@ function draw() {
 		lastTouchY = touches[0].y;
 	}
 
+	// Pinch to zoom
+	if (touches.length == 2) {
+	let currDist = dist(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
+	
+	if (prevDist > 0) {
+		let zoomAmount = (prevDist - currDist) * 0.01; // Adjust sensitivity
+		cam.move(0, 0, zoomAmount);  // Move the camera forward or backward
+	}
+	
+	prevDist = currDist; // Update the previous distance
+	} else {
+	prevDist = -1; // Reset the distance when not pinching
+	}
+
 	image(canvas_3d, 0, 0);
 
 	lastX = mouseX;
@@ -174,4 +190,9 @@ function touchStarted() {
 
 function touchEnded() {
 	isTouching = false;
+}
+
+function mouseWheel(event) {
+	// Optional: Zoom with the mouse wheel
+	cam.move(0, 0, event.delta);
 }
