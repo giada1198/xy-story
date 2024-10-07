@@ -143,6 +143,14 @@ function mousePressed() {
 	isDragging = true;
   }
   
-  function mouseReleased() {
-	isDragging = false;
-  }
+function mouseReleased() {
+isDragging = false;
+}
+
+function touchStarted() {
+isDragging = true;
+}
+
+function touchEnded() {
+isDragging = false;
+}
