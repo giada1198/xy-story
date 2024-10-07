@@ -46,8 +46,8 @@ function preload() {
 }
 
 function setup() {
-	let w = 1440;
-	let h = 1024;
+	let w = windowWidth;
+	let h = windowHeight;
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
 	canvas_3d.noStroke();
@@ -155,6 +155,7 @@ function draw() {
 }
 
 function mousePressed() {
+	console.log('mouse pressed');
 	isDragging = true;
 }
   
