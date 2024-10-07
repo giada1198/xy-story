@@ -15,7 +15,9 @@ let card_inner_left_img, card_inner_center_img, card_inner_right_img, card_inner
 
 let cam;
 let isDragging = false;
+let isTouching = false;
 let lastX, lastY;
+let lastTouchX, lastTouchY;
 
 
 const dpi_multiple = 3;
@@ -128,7 +130,20 @@ function draw() {
 		// cam.pan(-dx * 0.005);  // Horizontal movement
 		// cam.tilt(dy * 0.005);  // Vertical movement
 		cam.move(-dx, -dy, 0);
-	  }
+	}
+
+	if (isTouching && touches.length > 0) {
+		let dx = touches[0].x - lastTouchX;
+		let dy = touches[0].y - lastTouchY;
+	
+		// Adjust camera based on touch drag
+		cam.move(-dx, -dy, 0);
+	}
+
+	if (touches.length > 0) {
+		lastTouchX = touches[0].x;
+		lastTouchY = touches[0].y;
+	}
 
 	image(canvas_3d, 0, 0);
 
@@ -141,16 +156,21 @@ function draw() {
 
 function mousePressed() {
 	isDragging = true;
-  }
+}
   
 function mouseReleased() {
-isDragging = false;
+	isDragging = false;
 }
 
 function touchStarted() {
-isDragging = true;
+	isTouching = true;
+	if (touches.length > 0) {
+	  lastTouchX = touches[0].x;
+	  lastTouchY = touches[0].y;
+	}
+
 }
 
 function touchEnded() {
-isDragging = false;
+	isTouching = false;
 }
