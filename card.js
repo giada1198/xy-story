@@ -37,18 +37,16 @@ let ui_padding, ui_spacing;
 const dpi_multiple = 3;
 
 function preload() {
-	// card
+	// card inner
 	card_inner_left_img = loadImage('assets/card/card-inner-left.png');
 	card_inner_center_img = loadImage('assets/card/card-inner-center.png');
 	card_inner_right_img = loadImage('assets/card/card-inner-right.png');
 	card_inner_bottom_img = loadImage('assets/card/card-inner-bottom.png');
-
+	// card outer
 	card_outer_left_img = loadImage('assets/card/card-outer-left.png');
 	card_outer_center_img = loadImage('assets/card/card-outer-center.png');
 	card_outer_right_img = loadImage('assets/card/card-outer-right.png');
 	card_outer_bottom_img = loadImage('assets/card/card-outer-bottom.png');
-
-
 	// button
 	zoom_in_button_img = loadImage('assets/card/button-zoom-in.png');
 	zoom_out_button_img = loadImage('assets/card/button-zoom-out.png');
@@ -58,25 +56,22 @@ function preload() {
 }
 
 function setup() {
-	let w = windowWidth;
-	let h = windowHeight;
+	is_mobile = (windowWidth <= 700) ? true : false;
+	let w = Math.max(320, windowWidth);
+	let h = Math.max(480, windowHeight);
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
 	canvas_3d.noStroke();
-
-	ui_padding = 24;
-	ui_spacing = 8;
-
 	cam = canvas_3d.createCamera();
 	cam.setPosition(0, -300, 800);
+	cam_angle = 0.5*PI;
 
+	ui_padding = (is_mobile) ? 16 : 24;
+	ui_spacing = 8;
 
 	card_left_rotateY = PI;
 	card_right_rotateY = -PI;
 	card_bottom_rotateX = 0.99*PI;
-
-	cam_angle = 0.5*PI;
-
 
 	// zoom in button
 	let bw = zoom_in_button_img.width/dpi_multiple;
@@ -101,25 +96,16 @@ function setup() {
 }
 
 function draw() {
-
-
-
-
-
-	
 	background(0);
-	
-
 	canvas_3d.clear();
-	
 
+	// card center dimensions
+	let w_center = (is_mobile) ? width*(510/1020) : card_inner_center_img.width/dpi_multiple;
+	let h_center = (is_mobile) ? w_center*(card_inner_center_img.height/card_inner_center_img.width) : card_inner_center_img.height/dpi_multiple;
 
-
-	let w_center = card_inner_center_img.width/dpi_multiple;
-	let h_center = card_inner_center_img.height/dpi_multiple;
-
-	let w = card_inner_left_img.width/dpi_multiple;
-	let h = card_inner_left_img.height/dpi_multiple;
+	// card left dimensions
+	let w = (is_mobile) ? width*(255/1020) : card_inner_left_img.width/dpi_multiple;
+	let h = (is_mobile) ? w*(card_inner_left_img.height/card_inner_left_img.width) : card_inner_left_img.height/dpi_multiple;
 
 	// left inner
 	canvas_3d.push();
@@ -147,8 +133,9 @@ function draw() {
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
-	w = card_inner_right_img.width/dpi_multiple;
-	h = card_inner_right_img.height/dpi_multiple;
+	// card left dimensions
+	w = (is_mobile) ? width*(255/1020) : card_inner_right_img.width/dpi_multiple;
+	h = (is_mobile) ? w*(card_inner_right_img.height/card_inner_right_img.width) : card_inner_right_img.height/dpi_multiple;
 
 	// right inner
 	canvas_3d.push();
@@ -198,8 +185,9 @@ function draw() {
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
-	let w_bottom = card_inner_bottom_img.width/dpi_multiple;
-	let h_bottom = card_inner_bottom_img.height/dpi_multiple;
+	// card bottom dimensions
+	let w_bottom = (is_mobile) ? width*(510/1020) : card_inner_bottom_img.width/dpi_multiple;
+	let h_bottom = (is_mobile) ? w_center*(card_inner_bottom_img.height/card_inner_bottom_img.width) : card_inner_bottom_img.height/dpi_multiple;
 
 	// bottom inner
 	canvas_3d.push();
@@ -227,7 +215,6 @@ function draw() {
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
-
 	if (isDragging) {
 		let dx = mouseX - lastX;
 		let dy = mouseY - lastY;
@@ -235,6 +222,8 @@ function draw() {
 		// cam.tilt(dy * 0.005);  // Vertical movement
 		cam.move(-dx, -dy, 0);
 	}
+	lastX = mouseX;
+	lastY = mouseY;
 
 	if (isTouching && touches.length > 0) {
 		let dx = touches[0].x - last_touchX;
@@ -249,33 +238,15 @@ function draw() {
 		last_touchY = touches[0].y;
 	}
 
-
-
 	push();
 	tint(255, 255, 255, card_opacity);
 	image(canvas_3d, 0, 0);
 	pop();
 
-
-
-	
-
-	lastX = mouseX;
-	lastY = mouseY;
-
 	zoom_in_button.display();
 	zoom_out_button.display();
 	rotate_button.display();
-
 	image(tabs_img, windowWidth/2-154, windowHeight-ui_padding-56, 308, 56);
-
-	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
-		cursor('pointer');
-	} else if (isDragging){
-		cursor('grabbing');
-	} else {
-		cursor('grab');
-	}
 
 	if (state === 'init') {
 		if (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800 && card_opacity === 255) {
@@ -350,6 +321,14 @@ function draw() {
 			card_opacity = Math.min(255, card_opacity+5);
 		}
 		cam.lookAt(0, 0, 0);
+	}
+
+	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
+		cursor('pointer');
+	} else if (isDragging){
+		cursor('grabbing');
+	} else {
+		cursor('grab');
 	}
 }
 
@@ -548,6 +527,22 @@ function reset_camera_eyeXY(speed) {
 			cam.setPosition(cam.eyeX, cam.eyeY+speed, cam.eyeZ);
 		}
 	}
+}
+
+function windowResized() {
+	is_mobile = (windowWidth <= 700) ? true : false;
+	let w = Math.max(320, windowWidth);
+	let h = Math.max(480, windowHeight);
+	resizeCanvas(w, h);
+	canvas_3d.resizeCanvas(w, h);
+	ui_padding = (is_mobile) ? 16 : 24;
+
+	// reposition control buttons
+	let bw = zoom_in_button_img.width/dpi_multiple;
+	let bh = zoom_in_button_img.height/dpi_multiple;
+	zoom_in_button.position(w-ui_padding-bw, ui_padding);
+	zoom_out_button.position(w-ui_padding-bw, ui_padding+bh+ui_spacing);
+	rotate_button.position(ui_padding, ui_padding);
 }
 
 class Button {
