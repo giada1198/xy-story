@@ -6,6 +6,7 @@ let canvas_3d;
 
 let card_inner_left_img, card_inner_center_img, card_inner_right_img, card_inner_bottom_img;
 
+let card_left_rotateY, card_right_rotateY, card_bottom_rotateX;
 
 let zoom_in_button, zoom_in_button_img;
 let zoom_out_button, zoom_out_button_img;
@@ -18,16 +19,18 @@ let cam;
 let isDragging = false;
 let isTouching = false;
 let lastX, lastY;
-let lastTouchX, lastTouchY;
+let last_touchX, last_touchY;
+
+let cam_angle;
 
 let prevDist = -1;
 
-let target_eye_z = 800;
-const min_eye_z = 200;
-const max_eye_z = 1200;
+let target_eyeZ = 800;
+const min_eyeZ = 200;
+const max_eyeZ = 1200;
 
 
-
+let card_opacity = 0;
 
 
 let ui_padding, ui_spacing;
@@ -39,6 +42,12 @@ function preload() {
 	card_inner_center_img = loadImage('assets/card/card-inner-center.png');
 	card_inner_right_img = loadImage('assets/card/card-inner-right.png');
 	card_inner_bottom_img = loadImage('assets/card/card-inner-bottom.png');
+
+	card_outer_left_img = loadImage('assets/card/card-outer-left.png');
+	card_outer_center_img = loadImage('assets/card/card-outer-center.png');
+	card_outer_right_img = loadImage('assets/card/card-outer-right.png');
+	card_outer_bottom_img = loadImage('assets/card/card-outer-bottom.png');
+
 
 	// button
 	zoom_in_button_img = loadImage('assets/card/button-zoom-in.png');
@@ -59,9 +68,15 @@ function setup() {
 	ui_spacing = 8;
 
 	cam = canvas_3d.createCamera();
-	cam.setPosition(0, 0, 800);
+	cam.setPosition(0, -300, 800);
 
-	console.log(cam.eyeZ);
+
+	card_left_rotateY = PI;
+	card_right_rotateY = -PI;
+	card_bottom_rotateX = 0.99*PI;
+
+	cam_angle = 0.5*PI;
+
 
 	// zoom in button
 	let bw = zoom_in_button_img.width/dpi_multiple;
@@ -83,32 +98,19 @@ function setup() {
 	x = ui_padding;
 	y = ui_padding;
 	rotate_button = new Button(rotate_button_img, x, y, bw, bh, 255);
-
 }
 
 function draw() {
-	if (target_eye_z > cam.eyeZ) {
-		if (target_eye_z - cam.eyeZ < 4) {
-			cam.setPosition(cam.eyeX, cam.eyeY, target_eye_z);
-		} else {
-			cam.setPosition(cam.eyeX, cam.eyeY, cam.eyeZ + 4);
-		}
-		console.log(target_eye_z, cam.eyeZ);
-	} else if (target_eye_z < cam.eyeZ) {
-		if (cam.eyeZ - target_eye_z < 4) {
-			cam.setPosition(cam.eyeX, cam.eyeY, target_eye_z);
-		} else {
-			cam.setPosition(cam.eyeX, cam.eyeY, cam.eyeZ - 4);
-		}
-		console.log(target_eye_z, cam.eyeZ);
-	}
+
+
+
+
+
 	
 	background(0);
 	
 
 	canvas_3d.clear();
-	
-
 	
 
 
@@ -119,6 +121,7 @@ function draw() {
 	let w = card_inner_left_img.width/dpi_multiple;
 	let h = card_inner_left_img.height/dpi_multiple;
 
+	// left inner
 	canvas_3d.push();
 	canvas_3d.texture(card_inner_left_img);
 	canvas_3d.beginShape();
@@ -127,13 +130,27 @@ function draw() {
 	canvas_3d.vertex(0, h/2, 0, card_inner_left_img.width, card_inner_left_img.height);	// Bottom right corner
 	canvas_3d.vertex(-w, h/2, 0, 0, card_inner_left_img.height);          				// Bottom left corner
 	canvas_3d.translate(-w_center/2, 0, 0);
-	// canvas_3d.rotateY(PI/12);
+	canvas_3d.rotateY(card_left_rotateY);
+	canvas_3d.endShape(CLOSE);
+	canvas_3d.pop();
+
+	// left outer
+	canvas_3d.push();
+	canvas_3d.texture(card_outer_left_img);
+	canvas_3d.beginShape();
+	canvas_3d.vertex(0, -h/2, -0.01, 0, 0);
+	canvas_3d.vertex(-w, -h/2, -0.01, card_inner_left_img.width, 0);
+	canvas_3d.vertex(-w, h/2, -0.01, card_inner_left_img.width, card_inner_left_img.height);
+	canvas_3d.vertex(0, h/2, -0.01, 0, card_inner_left_img.height);
+	canvas_3d.translate(-w_center/2, 0, 0);
+	canvas_3d.rotateY(card_left_rotateY);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
 	w = card_inner_right_img.width/dpi_multiple;
 	h = card_inner_right_img.height/dpi_multiple;
 
+	// right inner
 	canvas_3d.push();
 	canvas_3d.texture(card_inner_right_img);
 	canvas_3d.beginShape();
@@ -142,10 +159,24 @@ function draw() {
 	canvas_3d.vertex(w, h/2, 0, card_inner_right_img.width, card_inner_right_img.height);	// Bottom right corner
 	canvas_3d.vertex(0, h/2, 0, 0, card_inner_right_img.height);          				    // Bottom left corner
 	canvas_3d.translate(w_center/2, 0, 0);
-	// canvas_3d.rotateY(-PI/12);
+	canvas_3d.rotateY(card_right_rotateY);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
+	// right outer
+	canvas_3d.push();
+	canvas_3d.texture(card_outer_right_img);
+	canvas_3d.beginShape();
+	canvas_3d.vertex(w, -h/2, -0.01, 0, 0);                         							// Top left corner
+	canvas_3d.vertex(0, -h/2, -0.01, card_inner_right_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(0, h/2, -0.01, card_inner_right_img.width, card_inner_right_img.height);	// Bottom right corner
+	canvas_3d.vertex(w, h/2, -0.01, 0, card_inner_right_img.height);          				    // Bottom left corner
+	canvas_3d.translate(w_center/2, 0, 0);
+	canvas_3d.rotateY(card_right_rotateY);
+	canvas_3d.endShape(CLOSE);
+	canvas_3d.pop();
+
+	// center inner
 	canvas_3d.push();
 	canvas_3d.texture(card_inner_center_img);
 	canvas_3d.beginShape();
@@ -156,10 +187,21 @@ function draw() {
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
+	// center outer
+	canvas_3d.push();
+	canvas_3d.texture(card_outer_center_img);
+	canvas_3d.beginShape();
+	canvas_3d.vertex(w_center/2, -h_center/2, -0.01, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(-w_center/2, -h_center/2, -0.01, card_inner_center_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(-w_center/2, h_center/2, -0.01, card_inner_center_img.width, card_inner_center_img.height);	// Bottom right corner
+	canvas_3d.vertex(w_center/2, h_center/2, -0.01, 0, card_inner_center_img.height);          				    // Bottom left corner
+	canvas_3d.endShape(CLOSE);
+	canvas_3d.pop();
+
 	let w_bottom = card_inner_bottom_img.width/dpi_multiple;
 	let h_bottom = card_inner_bottom_img.height/dpi_multiple;
 
-
+	// bottom inner
 	canvas_3d.push();
 	canvas_3d.texture(card_inner_bottom_img);
 	canvas_3d.beginShape();
@@ -168,11 +210,23 @@ function draw() {
 	canvas_3d.vertex(w_bottom/2, h_bottom, 0, card_inner_bottom_img.width, card_inner_bottom_img.height);	// Bottom right corner
 	canvas_3d.vertex(-w_bottom/2, h_bottom, 0, 0, card_inner_bottom_img.height);          				    // Bottom left corner
 	canvas_3d.translate(0, h_center/2, 0);
-	canvas_3d.rotateX(PI/6);
+	canvas_3d.rotateX(card_bottom_rotateX);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
-	
-	
+
+	// bottom outer
+	canvas_3d.push();
+	canvas_3d.texture(card_outer_bottom_img);
+	canvas_3d.beginShape();
+	canvas_3d.vertex(-w_bottom/2, h_bottom, -0.05, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(w_bottom/2, h_bottom, -0.05, card_inner_bottom_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w_bottom/2, 0, -0.05, card_inner_bottom_img.width, card_inner_bottom_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w_bottom/2, 0, 0, -0.05, card_inner_bottom_img.height);          				    // Bottom left corner
+	canvas_3d.translate(0, h_center/2, 0);
+	canvas_3d.rotateX(card_bottom_rotateX);
+	canvas_3d.endShape(CLOSE);
+	canvas_3d.pop();
+
 
 	if (isDragging) {
 		let dx = mouseX - lastX;
@@ -183,33 +237,24 @@ function draw() {
 	}
 
 	if (isTouching && touches.length > 0) {
-		let dx = touches[0].x - lastTouchX;
-		let dy = touches[0].y - lastTouchY;
+		let dx = touches[0].x - last_touchX;
+		let dy = touches[0].y - last_touchY;
 	
 		// Adjust camera based on touch drag
 		cam.move(-dx, -dy, 0);
 	}
 
 	if (touches.length > 0) {
-		lastTouchX = touches[0].x;
-		lastTouchY = touches[0].y;
+		last_touchX = touches[0].x;
+		last_touchY = touches[0].y;
 	}
 
-	// Pinch to zoom
-	if (touches.length == 2) {
-	let currDist = dist(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
-	
-	if (prevDist > 0) {
-		let zoomAmount = (prevDist - currDist) * 0.01; // Adjust sensitivity
-		cam.move(0, 0, zoomAmount);  // Move the camera forward or backward
-	}
-	
-	prevDist = currDist; // Update the previous distance
-	} else {
-	prevDist = -1; // Reset the distance when not pinching
-	}
 
+
+	push();
+	tint(255, 255, 255, card_opacity);
 	image(canvas_3d, 0, 0);
+	pop();
 
 
 
@@ -224,38 +269,141 @@ function draw() {
 
 	image(tabs_img, windowWidth/2-154, windowHeight-ui_padding-56, 308, 56);
 
-	if (zoom_in_button.is_hovered()) {
+	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
 		cursor('pointer');
-	} else if (zoom_out_button.is_hovered()) {
-		cursor('pointer');
-	 } else if (rotate_button.is_hovered()) {
-		cursor('pointer');
-	 } else if (isDragging){
+	} else if (isDragging){
 		cursor('grabbing');
-	 } else {
+	} else {
 		cursor('grab');
-	 }
+	}
 
+	if (state === 'init') {
+		if (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800 && card_opacity === 255) {
+			state = 'unfold-bottom';
+		} else {
+			reset_camera_eyeXY(3);
+			card_opacity = Math.min(255, card_opacity+2);
+		}
+	} else if (state === 'unfold-bottom') {
+		let x = card_bottom_rotateX - 0.008*PI;
+		if (x > 0.2*PI) {
+			card_bottom_rotateX = x;
+		} else {
+			card_bottom_rotateX = 0.2*PI;
+			state = 'unfold-sides';
+		}
+	} else if (state === 'unfold-sides') {
+		let y = card_left_rotateY - 0.008*PI;
+		if (y > 0.05*PI) {
+			card_left_rotateY = y;
+			card_right_rotateY = -y;
+		} else {
+			card_left_rotateY = 0.05*PI;
+			card_right_rotateY = -0.05*PI;
+			state = 'carrier-front';
+		}
+	} else if (state === 'carrier-front') {
+		move_camera_eyeZ();
+	} else if (state === 'carrier-front-to-back-reset') {
+		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800)) {
+			state = 'carrier-front-to-back';
+			cam.setPosition(0, 0, 800);
+			target_eyeZ = -800;
+		} else {
+			card_opacity = Math.max(0, card_opacity-15);
+		}
+	} else if (state === 'carrier-front-to-back') {
+		let a = cam_angle + 0.01*PI;
+		if (card_opacity === 255 && a > 1.5*PI) {
+			cam_angle = 1.5*PI;
+			cam.setPosition(0, 0, -800);
+			state = 'carrier-back';
+		} else {
+			cam_angle = a;
+			let ax = 800*cos(cam_angle);
+			let az = 800*sin(cam_angle);
+			cam.setPosition(ax, 0, az);
+			card_opacity = Math.min(255, card_opacity+5);
+		}
+		cam.lookAt(0, 0, 0);
+	} else if (state === 'carrier-back') {
+		move_camera_eyeZ();
+	} else if (state === 'carrier-back-to-front-reset') {
+		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === -800)) {
+			state = 'carrier-back-to-front';
+			cam.setPosition(0, 0, -800);
+			target_eyeZ = 800;
+		} else {
+			card_opacity = Math.max(0, card_opacity-15);
+		}
+	} else if (state === 'carrier-back-to-front') {
+		let a = cam_angle - 0.01*PI;
+		if (card_opacity === 255 && a < 0.5*PI) {
+			cam_angle = 0.5*PI;
+			cam.setPosition(0, 0, 800);
+			state = 'carrier-front';
+		} else {
+			cam_angle = a;
+			let ax = 800*cos(cam_angle);
+			let az = 800*sin(cam_angle);
+			cam.setPosition(ax, 0, az);
+			card_opacity = Math.min(255, card_opacity+5);
+		}
+		cam.lookAt(0, 0, 0);
+	}
 }
 
 function mousePressed() {
+	// zoom in button
 	if (zoom_in_button.is_hovered()) {
-		let z = cam.eyeZ - 50;
-		if (z > max_eye_z) {
-			target_eye_z = max_eye_z;
-		} else if (z < min_eye_z) {
-			target_eye_z = min_eye_z;
-		} else {
-			target_eye_z = z;
+		if (state === 'carrier-front') {
+			let z = cam.eyeZ - 50;
+			if (z > max_eyeZ) {
+				target_eyeZ = max_eyeZ;
+			} else if (z < min_eyeZ) {
+				target_eyeZ = min_eyeZ;
+			} else {
+				target_eyeZ = z;
+			}
+		} else if (state === 'carrier-back') {
+			let z = cam.eyeZ + 50;
+			if (z < -max_eyeZ) {
+				target_eyeZ = -max_eyeZ;
+			} else if (z > -min_eyeZ) {
+				target_eyeZ = -min_eyeZ;
+			} else {
+				target_eyeZ = z;
+			}
 		}
+	// zoom out button
 	} else if (zoom_out_button.is_hovered()) {
-		let z = cam.eyeZ + 50;
-		if (z > max_eye_z) {
-			target_eye_z = max_eye_z;
-		} else if (z < min_eye_z) {
-			target_eye_z = min_eye_z;
-		} else {
-			target_eye_z = z;
+		if (state === 'carrier-front') {
+			let z = cam.eyeZ + 50;
+			if (z > max_eyeZ) {
+				target_eyeZ = max_eyeZ;
+			} else if (z < min_eyeZ) {
+				target_eyeZ = min_eyeZ;
+			} else {
+				target_eyeZ = z;
+			}
+		} else if (state === 'carrier-back') {
+			let z = cam.eyeZ - 50;
+			if (z < -max_eyeZ) {
+				target_eyeZ = -max_eyeZ;
+			} else if (z > -min_eyeZ) {
+				target_eyeZ = -min_eyeZ;
+			} else {
+				target_eyeZ = z;
+			}
+		}
+	// rotate button
+	} else if (rotate_button.is_hovered()) {
+		if (state === 'carrier-front') {
+			state = 'carrier-front-to-back-reset';
+			target_eyeZ = 800;
+		} else if (state === 'carrier-back') {
+			state = 'carrier-back-to-front-reset';
+			target_eyeZ = -800;
 		}
 	} else {
 		isDragging = true;
@@ -268,48 +416,138 @@ function mouseReleased() {
 	cursor('grab');
 }
 
+function mouseWheel(event) {
+	if (state === 'carrier-front') {
+		let z = cam.eyeZ + event.delta;
+		if (z > max_eyeZ) {
+			target_eyeZ = max_eyeZ;
+		} else if (z < min_eyeZ) {
+			target_eyeZ = min_eyeZ;
+		} else {
+			target_eyeZ = z;
+		}
+		cam.setPosition(cam.eyeX, cam.eyeY, target_eyeZ);
+	} else if (state === 'carrier-back') {
+		let z = cam.eyeZ + event.delta;
+		if (z < -max_eyeZ) {
+			target_eyeZ = -max_eyeZ;
+		} else if (z > -min_eyeZ) {
+			target_eyeZ = -min_eyeZ;
+		} else {
+			target_eyeZ = z;
+		}
+		cam.setPosition(cam.eyeX, cam.eyeY, target_eyeZ);
+	}
+}
+
 function touchStarted() {
 	isTouching = true;
 	if (touches.length > 0) {
-	  lastTouchX = touches[0].x;
-	  lastTouchY = touches[0].y;
+		last_touchX = touches[0].x;
+		last_touchY = touches[0].y;
 	}
-
-}
-
-function mouseWheel(event) {
-	let z = cam.eyeZ + event.delta;
-	if (z > max_eye_z) {
-		target_eye_z = max_eye_z;
-	} else if (z < min_eye_z) {
-		target_eye_z = min_eye_z;
-	} else {
-		target_eye_z = z;
-	}
-	cam.setPosition(cam.eyeX, cam.eyeY, target_eye_z);
 }
 
 function touchEnded() {
+	isTouching = false;
+	// zoom in button
 	if (zoom_in_button.is_hovered()) {
-		let z = cam.eyeZ - 50;
-		if (z > max_eye_z) {
-			target_eye_z = max_eye_z;
-		} else if (z < min_eye_z) {
-			target_eye_z = min_eye_z;
-		} else {
-			target_eye_z = z;
+		if (state === 'carrier-front') {
+			let z = cam.eyeZ - 50;
+			if (z > max_eyeZ) {
+				target_eyeZ = max_eyeZ;
+			} else if (z < min_eyeZ) {
+				target_eyeZ = min_eyeZ;
+			} else {
+				target_eyeZ = z;
+			}
+		} else if (state === 'carrier-back') {
+			let z = cam.eyeZ + 50;
+			if (z < -max_eyeZ) {
+				target_eyeZ = -max_eyeZ;
+			} else if (z > -min_eyeZ) {
+				target_eyeZ = -min_eyeZ;
+			} else {
+				target_eyeZ = z;
+			}
 		}
+	// zoom out button
 	} else if (zoom_out_button.is_hovered()) {
-		let z = cam.eyeZ + 50;
-		if (z > max_eye_z) {
-			target_eye_z = max_eye_z;
-		} else if (z < min_eye_z) {
-			target_eye_z = min_eye_z;
-		} else {
-			target_eye_z = z;
+		if (state === 'carrier-front') {
+			let z = cam.eyeZ + 50;
+			if (z > max_eyeZ) {
+				target_eyeZ = max_eyeZ;
+			} else if (z < min_eyeZ) {
+				target_eyeZ = min_eyeZ;
+			} else {
+				target_eyeZ = z;
+			}
+		} else if (state === 'carrier-back') {
+			let z = cam.eyeZ - 50;
+			if (z < -max_eyeZ) {
+				target_eyeZ = -max_eyeZ;
+			} else if (z > -min_eyeZ) {
+				target_eyeZ = -min_eyeZ;
+			} else {
+				target_eyeZ = z;
+			}
+		}
+	// rotate button
+	} else if (rotate_button.is_hovered()) {
+		if (state === 'carrier-front') {
+			state = 'carrier-front-to-back-reset';
+			target_eyeZ = 800;
+		} else if (state === 'carrier-back') {
+			state = 'carrier-back-to-front-reset';
+			target_eyeZ = -800;
 		}
 	}
-	isTouching = false;
+}
+
+function move_camera_eyeZ() {
+	if (target_eyeZ > cam.eyeZ) {
+		if (target_eyeZ - cam.eyeZ < 4) {
+			cam.setPosition(cam.eyeX, cam.eyeY, target_eyeZ);
+		} else {
+			cam.setPosition(cam.eyeX, cam.eyeY, cam.eyeZ + 4);
+		}
+	} else if (target_eyeZ < cam.eyeZ) {
+		if (cam.eyeZ - target_eyeZ < 4) {
+			cam.setPosition(cam.eyeX, cam.eyeY, target_eyeZ);
+		} else {
+			cam.setPosition(cam.eyeX, cam.eyeY, cam.eyeZ - 4);
+		}
+	}
+}
+
+function reset_camera_eyeXY(speed) {
+	// let speed = 20;
+	if (cam.eyeX > 0) {
+		if (cam.eyeX-speed < 0) {
+			cam.setPosition(0, cam.eyeY, cam.eyeZ);
+		} else {
+			cam.setPosition(cam.eyeX-speed, cam.eyeY, cam.eyeZ);
+		}
+	} else if (cam.eyeX < 0) {
+		if (cam.eyeX-speed > 0) {
+			cam.setPosition(0, cam.eyeY, cam.eyeZ);
+		} else {
+			cam.setPosition(cam.eyeX+speed, cam.eyeY, cam.eyeZ);
+		}
+	}
+	if (cam.eyeY > 0) {
+		if (cam.eyeY-speed < 0) {
+			cam.setPosition(cam.eyeX, 0, cam.eyeZ);
+		} else {
+			cam.setPosition(cam.eyeX, cam.eyeY-speed, cam.eyeZ);
+		}
+	} else if (cam.eyeY < 0) {
+		if (cam.eyeY-speed > 0) {
+			cam.setPosition(cam.eyeX, 0, cam.eyeZ);
+		} else {
+			cam.setPosition(cam.eyeX, cam.eyeY+speed, cam.eyeZ);
+		}
+	}
 }
 
 class Button {
@@ -341,7 +579,6 @@ class Button {
 			tint(255, this.opacity);
 		}
 		image(this.img, this.x, this.y, this.width, this.height);
-		// console.log(this.x, this.y, this.width, this.height);
 		pop();
 	}
 
