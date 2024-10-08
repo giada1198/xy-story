@@ -12,7 +12,12 @@ let zoom_in_button, zoom_in_button_img;
 let zoom_out_button, zoom_out_button_img;
 let rotate_button, rotate_button_img;
 
-let tabs_img;
+
+let tab_ticket, tab_ticket_img, tab_ticket_selected_img;
+let tab_open, tab_open_img, tab_open_selected_img;
+let tab_closed, tab_closed_img, tab_closed_selected_img;
+let tab_receipt, tab_receipt_img, tab_receipt_selected_img;
+let tabs_background_img;
 
 
 let cam;
@@ -51,8 +56,16 @@ function preload() {
 	zoom_in_button_img = loadImage('assets/card/button-zoom-in.png');
 	zoom_out_button_img = loadImage('assets/card/button-zoom-out.png');
 	rotate_button_img = loadImage('assets/card/button-rotate.png');
-
-	tabs_img = loadImage('assets/card/tabs.png');
+	// tabs
+	tab_ticket_img = loadImage('assets/card/tab-ticket-default.png');
+	tab_ticket_selected_img = loadImage('assets/card/tab-ticket-selected.png');
+	tab_open_img = loadImage('assets/card/tab-open-default.png');
+	tab_open_selected_img = loadImage('assets/card/tab-open-selected.png');
+	tab_closed_img = loadImage('assets/card/tab-closed-default.png');
+	tab_closed_selected_img = loadImage('assets/card/tab-closed-selected.png');
+	tab_receipt_img = loadImage('assets/card/tab-receipt-default.png');
+	tab_receipt_selected_img = loadImage('assets/card/tab-receipt-selected.png');
+	tabs_background_img = loadImage('assets/card/tabs-background.png');
 }
 
 function setup() {
@@ -93,6 +106,39 @@ function setup() {
 	x = ui_padding;
 	y = ui_padding;
 	rotate_button = new Button(rotate_button_img, x, y, bw, bh, 255);
+
+	// tab ticket
+	bw = tab_ticket_img.width/dpi_multiple;
+	bh = tab_ticket_img.height/dpi_multiple;
+	x = width/2-bw*2;
+	y = height-ui_padding-bh-4;
+	tab_ticket = new Button(tab_ticket_img, x, y, bw, bh, 255);
+
+	// tab open
+	bw = tab_open_img.width/dpi_multiple;
+	bh = tab_open_img.height/dpi_multiple;
+	x = width/2-bw;
+	y = height-ui_padding-bh-4;
+	tab_open = new Button(tab_open_img, x, y, bw, bh, 255);
+
+	// tab closed
+	bw = tab_closed_img.width/dpi_multiple;
+	bh = tab_closed_img.height/dpi_multiple;
+	x = width/2+4;
+	y = height-ui_padding-bh-4;
+	tab_closed = new Button(tab_closed_img, x, y, bw, bh, 255);
+
+	// tab receipt
+	bw = tab_receipt_img.width/dpi_multiple;
+	bh = tab_receipt_img.height/dpi_multiple;
+	x = width/2+bw;
+	y = height-ui_padding-bh-4;
+	tab_receipt = new Button(tab_receipt_img, x, y, bw, bh, 255);
+
+	// let bw = tabs_background_img.width/dpi_multiple;
+	// let bh = tabs_background_img.height/dpi_multiple;
+	// image(tabs_background_img, width/2-bw/2, height-ui_padding-bh, bw, bh);
+
 }
 
 function draw() {
@@ -246,7 +292,15 @@ function draw() {
 	zoom_in_button.display();
 	zoom_out_button.display();
 	rotate_button.display();
-	image(tabs_img, windowWidth/2-154, windowHeight-ui_padding-56, 308, 56);
+
+	let bw = tabs_background_img.width/dpi_multiple;
+	let bh = tabs_background_img.height/dpi_multiple;
+	image(tabs_background_img, width/2-bw/2, height-ui_padding-bh, bw, bh);
+
+	tab_ticket.display();
+	tab_open.display();
+	tab_closed.display();
+	tab_receipt.display();
 
 	if (state === 'init') {
 		if (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800 && card_opacity === 255) {
@@ -324,6 +378,8 @@ function draw() {
 	}
 
 	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
+		cursor('pointer');
+	} else if (tab_ticket.is_hovered() || tab_open.is_hovered() || tab_closed.is_hovered() || tab_receipt.is_hovered()) {
 		cursor('pointer');
 	} else if (isDragging){
 		cursor('grabbing');
@@ -546,6 +602,47 @@ function windowResized() {
 }
 
 class Button {
+	constructor(img, inX, inY, inWidth, inHeight, opacity) {
+		this.x = inX;
+		this.y = inY;
+		this.width = inWidth;
+		this.height = inHeight;
+		this.img = img;
+		this.opacity = opacity;
+	}
+
+	position(inX, inY) {
+		this.x = inX;
+		this.y = inY;
+	}
+
+	size(inWidth, inHeight) {
+		this.width = inWidth;
+		this.height = inHeight;	
+	}
+
+	display() {
+		stroke(0);
+		push();
+		if (this.is_hovered()) {
+			tint(170, 170, 170, this.opacity);
+		} else {
+			tint(255, this.opacity);
+		}
+		image(this.img, this.x, this.y, this.width, this.height);
+		pop();
+	}
+
+	is_hovered() {
+		if ((mouseX > this.x) && (mouseX < this.x+this.width) && (mouseY > this.y) && (mouseY < this.y+this.height)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+class Tab {
 	constructor(img, inX, inY, inWidth, inHeight, opacity) {
 		this.x = inX;
 		this.y = inY;
