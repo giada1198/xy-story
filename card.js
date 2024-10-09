@@ -473,7 +473,6 @@ function mousePressed() {
 	let should_continue = true;
 	tabs.forEach(tab => {
 		if (tab.is_hovered()) {
-			console.log('hey');
 			tab.clicked();
 			should_continue = false;
 		}
