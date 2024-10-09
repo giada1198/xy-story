@@ -72,7 +72,7 @@ function preload() {
 function setup() {
 	is_mobile = (windowWidth <= 1020) ? true : false;
 	let w = Math.max(320, windowWidth);
-	let h = Math.max(300, windowHeight);
+	let h = Math.max(240, windowHeight);
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
 	canvas_3d.noStroke();
@@ -306,7 +306,10 @@ function draw() {
 	let bh = tabs_background_img.height/dpi_multiple;
 
 	if (!['init', 'unfold-bottom', 'unfold-sides'].includes(state)) {
+		push();
+		tint(255, 255, 255, 127);
 		image(tabs_background_img, width/2-bw/2, height-ui_padding-bh, bw, bh);
+		pop();
 	}
 
 	tabs.forEach(tab => {
@@ -629,7 +632,7 @@ function reset_camera_eyeXY(speed) {
 function windowResized() {
 	is_mobile = (windowWidth <= 1020) ? true : false;
 	let w = Math.max(320, windowWidth);
-	let h = Math.max(300, windowHeight);
+	let h = Math.max(240, windowHeight);
 	resizeCanvas(w, h);
 	canvas_3d.resizeCanvas(w, h);
 	ui_padding = (is_mobile) ? 16 : 24;
@@ -802,7 +805,7 @@ class Tab {
 			stroke(0);
 			push();
 			if (this.is_hovered()) {
-				tint(170, 170, 170);
+				tint(204, 204, 204);
 			} else {
 				tint(255);
 			}
