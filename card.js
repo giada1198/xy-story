@@ -3,22 +3,23 @@ let is_mobile;
 
 let canvas_3d;
 
-
 let card_inner_left_img, card_inner_center_img, card_inner_right_img, card_inner_bottom_img;
-
+let card_outer_left_img, card_outer_center_img, card_outer_right_img, card_outer_bottom_img;
 let card_left_rotateY, card_right_rotateY, card_bottom_rotateX;
+
+let ticket_front_img, ticket_back_img;
+
+let receipt_top_img, receipt_bottom_img;
 
 let zoom_in_button, zoom_in_button_img;
 let zoom_out_button, zoom_out_button_img;
 let rotate_button, rotate_button_img;
-
 
 let tab_ticket, tab_ticket_img, tab_ticket_selected_img;
 let tab_open, tab_open_img, tab_open_selected_img;
 let tab_closed, tab_closed_img, tab_closed_selected_img;
 let tab_receipt, tab_receipt_img, tab_receipt_selected_img;
 let tabs_background_img;
-
 
 let cam;
 let isDragging = false;
@@ -53,7 +54,13 @@ function preload() {
 	card_outer_center_img = loadImage('assets/card/card-outer-center.png');
 	card_outer_right_img = loadImage('assets/card/card-outer-right.png');
 	card_outer_bottom_img = loadImage('assets/card/card-outer-bottom.png');
-	// button
+	// ticket
+	ticket_front_img = loadImage('assets/card/ticket-front.png');
+	ticket_back_img = loadImage('assets/card/ticket-back.png');
+	// receipt
+	receipt_top_img = loadImage('assets/card/receipt-top.png');
+	receipt_bottom_img = loadImage('assets/card/receipt-bottom.png');
+	// buttons
 	zoom_in_button_img = loadImage('assets/card/button-zoom-in.png');
 	zoom_out_button_img = loadImage('assets/card/button-zoom-out.png');
 	rotate_button_img = loadImage('assets/card/button-rotate.png');
@@ -108,19 +115,10 @@ function setup() {
 	y = ui_padding;
 	rotate_button = new Button(rotate_button_img, x, y, bw, bh, 255);
 
-	// tab: ticket
-	bw = tab_ticket_img.width/dpi_multiple;
-	bh = tab_ticket_img.height/dpi_multiple;
-	x = width/2-bw*2;
-	y = height-ui_padding-bh-4;
-	tab_ticket = new Tab(tab_ticket_img, tab_ticket_selected_img, x, y, bw, bh, 255);
-	tab_ticket.state = 'hidden';
-	tabs.push(tab_ticket);
-
 	// tab: open
 	bw = tab_open_img.width/dpi_multiple;
 	bh = tab_open_img.height/dpi_multiple;
-	x = width/2-bw;
+	x = width/2-bw*2;
 	y = height-ui_padding-bh-4;
 	tab_open = new Tab(tab_open_img, tab_open_selected_img, x, y, bw, bh, go_to_carrier_open);
 	tab_open.state = 'hidden';
@@ -129,11 +127,20 @@ function setup() {
 	// tab: closed
 	bw = tab_closed_img.width/dpi_multiple;
 	bh = tab_closed_img.height/dpi_multiple;
-	x = width/2+4;
+	x = width/2-bw;
 	y = height-ui_padding-bh-4;
 	tab_closed = new Tab(tab_closed_img, tab_closed_selected_img, x, y, bw, bh, go_to_carrier_closed);
 	tab_closed.state = 'hidden';
 	tabs.push(tab_closed);
+
+	// tab: ticket
+	bw = tab_ticket_img.width/dpi_multiple;
+	bh = tab_ticket_img.height/dpi_multiple;
+	x = width/2+4;
+	y = height-ui_padding-bh-4;
+	tab_ticket = new Tab(tab_ticket_img, tab_ticket_selected_img, x, y, bw, bh, 255);
+	tab_ticket.state = 'hidden';
+	tabs.push(tab_ticket);
 
 	// tab: receipt
 	bw = tab_receipt_img.width/dpi_multiple;
@@ -143,11 +150,6 @@ function setup() {
 	tab_receipt = new Tab(tab_receipt_img, tab_receipt_selected_img, x, y, bw, bh, go_to_carrier_open);
 	tab_receipt.state = 'hidden';
 	tabs.push(tab_receipt);
-
-	// let bw = tabs_background_img.width/dpi_multiple;
-	// let bh = tabs_background_img.height/dpi_multiple;
-	// image(tabs_background_img, width/2-bw/2, height-ui_padding-bh, bw, bh);
-
 }
 
 function draw() {
@@ -162,27 +164,27 @@ function draw() {
 	let w = (is_mobile) ? width*(255/1020) : card_inner_left_img.width/dpi_multiple;
 	let h = (is_mobile) ? w*(card_inner_left_img.height/card_inner_left_img.width) : card_inner_left_img.height/dpi_multiple;
 
-	// left inner
+	// card left inner
 	canvas_3d.push();
 	canvas_3d.texture(card_inner_left_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(-w, -h/2, 0, 0, 0);                         						// Top left corner
-	canvas_3d.vertex(0, -h/2, 0, card_inner_left_img.width, 0);               			// Top right corner
-	canvas_3d.vertex(0, h/2, 0, card_inner_left_img.width, card_inner_left_img.height);	// Bottom right corner
-	canvas_3d.vertex(-w, h/2, 0, 0, card_inner_left_img.height);          				// Bottom left corner
+	canvas_3d.vertex(-w, -h/2, -0.04, 0, 0);                         						// Top left corner
+	canvas_3d.vertex(0, -h/2, -0.04, card_inner_left_img.width, 0);               			// Top right corner
+	canvas_3d.vertex(0, h/2, -0.04, card_inner_left_img.width, card_inner_left_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w, h/2, -0.04, 0, card_inner_left_img.height);          				// Bottom left corner
 	canvas_3d.translate(-w_center/2, 0, 0);
 	canvas_3d.rotateY(card_left_rotateY);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
-	// left outer
+	// card left outer
 	canvas_3d.push();
 	canvas_3d.texture(card_outer_left_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(0, -h/2, -0.01, 0, 0);
-	canvas_3d.vertex(-w, -h/2, -0.01, card_inner_left_img.width, 0);
-	canvas_3d.vertex(-w, h/2, -0.01, card_inner_left_img.width, card_inner_left_img.height);
-	canvas_3d.vertex(0, h/2, -0.01, 0, card_inner_left_img.height);
+	canvas_3d.vertex(0, -h/2, -0.05, 0, 0);
+	canvas_3d.vertex(-w, -h/2, -0.05, card_inner_left_img.width, 0);
+	canvas_3d.vertex(-w, h/2, -0.05, card_inner_left_img.width, card_inner_left_img.height);
+	canvas_3d.vertex(0, h/2, -0.05, 0, card_inner_left_img.height);
 	canvas_3d.translate(-w_center/2, 0, 0);
 	canvas_3d.rotateY(card_left_rotateY);
 	canvas_3d.endShape(CLOSE);
@@ -192,51 +194,51 @@ function draw() {
 	w = (is_mobile) ? width*(255/1020) : card_inner_right_img.width/dpi_multiple;
 	h = (is_mobile) ? w*(card_inner_right_img.height/card_inner_right_img.width) : card_inner_right_img.height/dpi_multiple;
 
-	// right inner
+	// card right inner
 	canvas_3d.push();
 	canvas_3d.texture(card_inner_right_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(0, -h/2, 0, 0, 0);                         							// Top left corner
-	canvas_3d.vertex(w, -h/2, 0, card_inner_right_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(w, h/2, 0, card_inner_right_img.width, card_inner_right_img.height);	// Bottom right corner
-	canvas_3d.vertex(0, h/2, 0, 0, card_inner_right_img.height);          				    // Bottom left corner
+	canvas_3d.vertex(0, -h/2, -0.04, 0, 0);                         							// Top left corner
+	canvas_3d.vertex(w, -h/2, -0.04, card_inner_right_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w, h/2, -0.04, card_inner_right_img.width, card_inner_right_img.height);	// Bottom right corner
+	canvas_3d.vertex(0, h/2, -0.04, 0, card_inner_right_img.height);          				    // Bottom left corner
 	canvas_3d.translate(w_center/2, 0, 0);
 	canvas_3d.rotateY(card_right_rotateY);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
-	// right outer
+	// card right outer
 	canvas_3d.push();
 	canvas_3d.texture(card_outer_right_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(w, -h/2, -0.01, 0, 0);                         							// Top left corner
-	canvas_3d.vertex(0, -h/2, -0.01, card_inner_right_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(0, h/2, -0.01, card_inner_right_img.width, card_inner_right_img.height);	// Bottom right corner
-	canvas_3d.vertex(w, h/2, -0.01, 0, card_inner_right_img.height);          				    // Bottom left corner
-	canvas_3d.translate(w_center/2, 0, 0);
+	canvas_3d.vertex(w, -h/2, -0.05, 0, 0);                         							// Top left corner
+	canvas_3d.vertex(0, -h/2, -0.05, card_inner_right_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(0, h/2, -0.05, card_inner_right_img.width, card_inner_right_img.height);	// Bottom right corner
+	canvas_3d.vertex(w, h/2, -0.05, 0, card_inner_right_img.height);          				    // Bottom left corner
+	canvas_3d.translate(w_center/2, 0.04, 0);
 	canvas_3d.rotateY(card_right_rotateY);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
-	// center inner
+	// card center inner
 	canvas_3d.push();
 	canvas_3d.texture(card_inner_center_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(-w_center/2, -h_center/2, 0, 0, 0);                         									// Top left corner
-	canvas_3d.vertex(w_center/2, -h_center/2, 0, card_inner_center_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(w_center/2, h_center/2, 0, card_inner_center_img.width, card_inner_center_img.height);	// Bottom right corner
-	canvas_3d.vertex(-w_center/2, h_center/2, 0, 0, card_inner_center_img.height);          				    // Bottom left corner
+	canvas_3d.vertex(-w_center/2, -h_center/2, -0.05, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(w_center/2, -h_center/2, -0.05, card_inner_center_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w_center/2, h_center/2, -0.05, card_inner_center_img.width, card_inner_center_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w_center/2, h_center/2, -0.05, 0, card_inner_center_img.height);          				    // Bottom left corner
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
-	// center outer
+	// card center outer
 	canvas_3d.push();
 	canvas_3d.texture(card_outer_center_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(w_center/2, -h_center/2, -0.01, 0, 0);                         									// Top left corner
-	canvas_3d.vertex(-w_center/2, -h_center/2, -0.01, card_inner_center_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(-w_center/2, h_center/2, -0.01, card_inner_center_img.width, card_inner_center_img.height);	// Bottom right corner
-	canvas_3d.vertex(w_center/2, h_center/2, -0.01, 0, card_inner_center_img.height);          				    // Bottom left corner
+	canvas_3d.vertex(w_center/2, -h_center/2, -0.06, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(-w_center/2, -h_center/2, -0.06, card_inner_center_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(-w_center/2, h_center/2, -0.06, card_inner_center_img.width, card_inner_center_img.height);	// Bottom right corner
+	canvas_3d.vertex(w_center/2, h_center/2, -0.06, 0, card_inner_center_img.height);          				    // Bottom left corner
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
@@ -244,7 +246,7 @@ function draw() {
 	let w_bottom = (is_mobile) ? width*(510/1020) : card_inner_bottom_img.width/dpi_multiple;
 	let h_bottom = (is_mobile) ? w_center*(card_inner_bottom_img.height/card_inner_bottom_img.width) : card_inner_bottom_img.height/dpi_multiple;
 
-	// bottom inner
+	// card bottom inner
 	canvas_3d.push();
 	canvas_3d.texture(card_inner_bottom_img);
 	canvas_3d.beginShape();
@@ -257,18 +259,84 @@ function draw() {
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
-	// bottom outer
+	// card bottom outer
 	canvas_3d.push();
 	canvas_3d.texture(card_outer_bottom_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(-w_bottom/2, h_bottom, -0.05, 0, 0);                         									// Top left corner
-	canvas_3d.vertex(w_bottom/2, h_bottom, -0.05, card_inner_bottom_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(w_bottom/2, 0, -0.05, card_inner_bottom_img.width, card_inner_bottom_img.height);	// Bottom right corner
-	canvas_3d.vertex(-w_bottom/2, 0, 0, -0.05, card_inner_bottom_img.height);          				    // Bottom left corner
+	canvas_3d.vertex(-w_bottom/2, h_bottom, -0.5, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(w_bottom/2, h_bottom, -0.5, card_inner_bottom_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w_bottom/2, 0, -0.5, card_inner_bottom_img.width, card_inner_bottom_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w_bottom/2, 0, 0, -0.5, card_inner_bottom_img.height);          				    // Bottom left corner
 	canvas_3d.translate(0, h_center/2, 0);
 	canvas_3d.rotateX(card_bottom_rotateX);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
+
+	// ticket dimensions
+	let w_ticket = (is_mobile) ? width*(450/1020) : ticket_front_img.width/dpi_multiple;
+	let h_ticket = (is_mobile) ? w_ticket*(ticket_front_img.height/ticket_front_img.width) : ticket_front_img.height/dpi_multiple;
+
+	// ticket front
+	canvas_3d.push();
+	canvas_3d.texture(ticket_front_img);
+	canvas_3d.beginShape();
+	canvas_3d.vertex(-w_ticket/2, -h_ticket/2, 0.03, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(w_ticket/2, -h_ticket/2, 0.03, ticket_front_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w_ticket/2, h_ticket/2, 0.03, ticket_front_img.width, ticket_front_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w_ticket/2, h_ticket/2, 0.03, 0, ticket_front_img.height);          				    // Bottom left corner
+	canvas_3d.endShape(CLOSE);
+	canvas_3d.pop();
+
+	// ticket back
+	if (state === 'ticket') {
+		canvas_3d.push();
+		canvas_3d.texture(ticket_back_img);
+		canvas_3d.beginShape();
+		canvas_3d.vertex(w_ticket/2, -h_ticket/2, 0, 0, 0);                         									// Top left corner
+		canvas_3d.vertex(-w_ticket/2, -h_ticket/2, 0, ticket_back_img.width, 0);               				// Top right corner
+		canvas_3d.vertex(-w_ticket/2, h_ticket/2, 0, ticket_back_img.width, ticket_back_img.height);	// Bottom right corner
+		canvas_3d.vertex(w_ticket/2, h_ticket/2, 0, 0, ticket_back_img.height);          				    // Bottom left corner
+		canvas_3d.endShape(CLOSE);
+		canvas_3d.pop();
+	}
+
+	// receipt dimensions
+	let h_receipt_top = (is_mobile) ? width*(450/1020) : receipt_top_img.height/dpi_multiple;
+	let h_receipt_bottom = (is_mobile) ? width*(234/1020) : receipt_bottom_img.height/dpi_multiple;
+	let w_receipt = (is_mobile) ? h_receipt_top*(receipt_top_img.width/receipt_top_img.height) : receipt_top_img.width/dpi_multiple;
+
+	// receipt top
+	canvas_3d.push();
+	canvas_3d.texture(receipt_top_img);
+	canvas_3d.beginShape();
+	canvas_3d.vertex(-w_receipt/2, -h_receipt_top/2, 0.02, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(w_receipt/2, -h_receipt_top/2, 0.02, receipt_top_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w_receipt/2, h_receipt_top/2, 0.02, receipt_top_img.width, receipt_top_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w_receipt/2, h_receipt_top/2, 0.02, 0, receipt_top_img.height);          				    // Bottom left corner
+	canvas_3d.rotateZ(0.5*PI);
+	canvas_3d.endShape(CLOSE);
+	canvas_3d.pop();
+
+	// receipt bottom
+	canvas_3d.push();
+	canvas_3d.texture(receipt_bottom_img);
+	canvas_3d.beginShape();
+	canvas_3d.vertex(-w_receipt/2, 0, 0.01, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(w_receipt/2, 0, 0.01, receipt_bottom_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w_receipt/2, h_receipt_bottom, 0.01, receipt_bottom_img.width, receipt_bottom_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w_receipt/2, h_receipt_bottom, 0.01, 0, receipt_bottom_img.height);          				    // Bottom left corner
+	canvas_3d.translate(-h_receipt_top/2, 0, 0);
+	canvas_3d.rotateY(-PI);
+	canvas_3d.rotateZ(0.5*PI);
+	canvas_3d.endShape(CLOSE);
+	canvas_3d.pop();
+
+
+
+
+
+
+
 
 	if (isDragging) {
 		let dx = mouseX - lastX;
@@ -307,7 +375,7 @@ function draw() {
 
 	if (!['init', 'unfold-bottom', 'unfold-sides'].includes(state)) {
 		push();
-		tint(255, 255, 255, 127);
+		tint(255, 255, 255);
 		image(tabs_background_img, width/2-bw/2, height-ui_padding-bh, bw, bh);
 		pop();
 	}
@@ -449,8 +517,6 @@ function draw() {
 
 	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
 		cursor('pointer');
-	} else if (tab_ticket.is_hovered() || tab_open.is_hovered() || tab_closed.is_hovered() || tab_receipt.is_hovered()) {
-		// cursor('pointer');
 	} else if (isDragging){
 		cursor('grabbing');
 	} else {
@@ -647,13 +713,13 @@ function windowResized() {
 	// reposition tabs
 	bw = tab_ticket_img.width/dpi_multiple;
 	bh = tab_ticket_img.height/dpi_multiple;
-	let x = w/2-bw*2;
+	let x = w/2+4;
 	let y = h-ui_padding-bh-4;
 	tab_ticket.position(x, y);
-	x = w/2-bw;
+	x = w/2-bw*2;
 	y = h-ui_padding-bh-4;
 	tab_open.position(x, y);
-	x = w/2+4;
+	x = w/2-bw;
 	y = h-ui_padding-bh-4;
 	tab_closed.position(x, y);
 	x = w/2+bw;
@@ -662,7 +728,7 @@ function windowResized() {
 }
 
 function zoom_in() {
-	d = (is_mobile) ? 100 : 50;
+	d = (is_mobile) ? 100 : 70;
 	if (['carrier-open-front', 'carrier-closed-front'].includes(state)) {
 		let z = cam.eyeZ - d;
 		if (z > max_eyeZ) {
@@ -685,7 +751,7 @@ function zoom_in() {
 }
 
 function zoom_out() {
-	d = (is_mobile) ? 100 : 50;
+	d = (is_mobile) ? 100 : 70;
 	if (['carrier-open-front', 'carrier-closed-front'].includes(state)) {
 		let z = cam.eyeZ + d;
 		if (z > max_eyeZ) {
@@ -761,7 +827,7 @@ class Button {
 		stroke(0);
 		push();
 		if (this.is_hovered()) {
-			tint(170, 170, 170, this.opacity);
+			tint(204, 204, 204, this.opacity);
 		} else {
 			tint(255, this.opacity);
 		}
@@ -830,4 +896,3 @@ class Tab {
 		this.go_to();
 	}
 }
-
