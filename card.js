@@ -70,7 +70,7 @@ function preload() {
 }
 
 function setup() {
-	is_mobile = (windowWidth <= 700) ? true : false;
+	is_mobile = (windowWidth <= 1020) ? true : false;
 	let w = Math.max(320, windowWidth);
 	let h = Math.max(480, windowHeight);
 	createCanvas(w, h);
