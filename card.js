@@ -545,9 +545,8 @@ function touchStarted() {
 }
 
 function touchEnded() {
-	isTouching = false;
-
 	let should_continue = true;
+	isTouching = false;
 	tabs.forEach(tab => {
 		if (tab.is_hovered()) {
 			tab.clicked();
@@ -570,6 +569,12 @@ function touchEnded() {
 			target_eyeZ = 800;
 		} else if (state === 'carrier-open-back') {
 			state = 'carrier-open-back-to-front-reset';
+			target_eyeZ = -800;
+		} else if (state === 'carrier-closed-front') {
+			state = 'carrier-closed-front-to-back-reset';
+			target_eyeZ = 800;
+		} else if (state === 'carrier-closed-back') {
+			state = 'carrier-closed-back-to-front-reset';
 			target_eyeZ = -800;
 		}
 	}
