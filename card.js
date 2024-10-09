@@ -72,7 +72,7 @@ function preload() {
 function setup() {
 	is_mobile = (windowWidth <= 1020) ? true : false;
 	let w = Math.max(320, windowWidth);
-	let h = Math.max(480, windowHeight);
+	let h = Math.max(300, windowHeight);
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
 	canvas_3d.noStroke();
@@ -629,7 +629,7 @@ function reset_camera_eyeXY(speed) {
 function windowResized() {
 	is_mobile = (windowWidth <= 1020) ? true : false;
 	let w = Math.max(320, windowWidth);
-	let h = Math.max(480, windowHeight);
+	let h = Math.max(300, windowHeight);
 	resizeCanvas(w, h);
 	canvas_3d.resizeCanvas(w, h);
 	ui_padding = (is_mobile) ? 16 : 24;
