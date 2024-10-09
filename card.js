@@ -470,17 +470,18 @@ function draw() {
 }
 
 function mousePressed() {
-
-
+	let should_continue = true;
 	tabs.forEach(tab => {
 		if (tab.is_hovered()) {
 			console.log('hey');
 			tab.clicked();
+			should_continue = false;
 		}
 	});
-
 	// zoom in button
-	if (zoom_in_button.is_hovered()) {
+	if (!should_continue) {
+		return;
+	} else if (zoom_in_button.is_hovered()) {
 		zoom_in();
 	// zoom out button
 	} else if (zoom_out_button.is_hovered()) {
@@ -500,7 +501,6 @@ function mousePressed() {
 			state = 'carrier-closed-back-to-front-reset';
 			target_eyeZ = -800;
 		}
-			
 	} else {
 		isDragging = true;
 		cursor('grabbing');
@@ -546,8 +546,19 @@ function touchStarted() {
 
 function touchEnded() {
 	isTouching = false;
+
+	let should_continue = true;
+	tabs.forEach(tab => {
+		if (tab.is_hovered()) {
+			tab.clicked();
+			should_continue = false;
+		}
+	});
 	// zoom in button
-	if (zoom_in_button.is_hovered()) {
+	if (!should_continue) {
+		return;
+	// zoom in button
+	} else if (zoom_in_button.is_hovered()) {
 		zoom_in();
 	// zoom out button
 	} else if (zoom_out_button.is_hovered()) {
