@@ -627,7 +627,7 @@ function reset_camera_eyeXY(speed) {
 }
 
 function windowResized() {
-	is_mobile = (windowWidth <= 700) ? true : false;
+	is_mobile = (windowWidth <= 1020) ? true : false;
 	let w = Math.max(320, windowWidth);
 	let h = Math.max(480, windowHeight);
 	resizeCanvas(w, h);
@@ -640,6 +640,22 @@ function windowResized() {
 	zoom_in_button.position(w-ui_padding-bw, ui_padding);
 	zoom_out_button.position(w-ui_padding-bw, ui_padding+bh+ui_spacing);
 	rotate_button.position(ui_padding, ui_padding);
+
+	// reposition tabs
+	bw = tab_ticket_img.width/dpi_multiple;
+	bh = tab_ticket_img.height/dpi_multiple;
+	let x = w/2-bw*2;
+	let y = h-ui_padding-bh-4;
+	tab_ticket.position(x, y);
+	x = w/2-bw;
+	y = h-ui_padding-bh-4;
+	tab_open.position(x, y);
+	x = w/2+4;
+	y = h-ui_padding-bh-4;
+	tab_closed.position(x, y);
+	x = w/2+bw;
+	y = h-ui_padding-bh-4;
+	tab_receipt.position(x, y);
 }
 
 function zoom_in() {
