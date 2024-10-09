@@ -37,6 +37,7 @@ const max_eyeZ = 1200;
 
 let card_opacity = 0;
 
+let tabs = [];
 
 let ui_padding, ui_spacing;
 const dpi_multiple = 3;
@@ -107,33 +108,41 @@ function setup() {
 	y = ui_padding;
 	rotate_button = new Button(rotate_button_img, x, y, bw, bh, 255);
 
-	// tab ticket
+	// tab: ticket
 	bw = tab_ticket_img.width/dpi_multiple;
 	bh = tab_ticket_img.height/dpi_multiple;
 	x = width/2-bw*2;
 	y = height-ui_padding-bh-4;
-	tab_ticket = new Button(tab_ticket_img, x, y, bw, bh, 255);
+	tab_ticket = new Tab(tab_ticket_img, tab_ticket_selected_img, x, y, bw, bh, 255);
+	tab_ticket.state = 'hidden';
+	tabs.push(tab_ticket);
 
-	// tab open
+	// tab: open
 	bw = tab_open_img.width/dpi_multiple;
 	bh = tab_open_img.height/dpi_multiple;
 	x = width/2-bw;
 	y = height-ui_padding-bh-4;
-	tab_open = new Button(tab_open_img, x, y, bw, bh, 255);
+	tab_open = new Tab(tab_open_img, tab_open_selected_img, x, y, bw, bh, go_to_carrier_open);
+	tab_open.state = 'hidden';
+	tabs.push(tab_open);
 
-	// tab closed
+	// tab: closed
 	bw = tab_closed_img.width/dpi_multiple;
 	bh = tab_closed_img.height/dpi_multiple;
 	x = width/2+4;
 	y = height-ui_padding-bh-4;
-	tab_closed = new Button(tab_closed_img, x, y, bw, bh, 255);
+	tab_closed = new Tab(tab_closed_img, tab_closed_selected_img, x, y, bw, bh, go_to_carrier_closed);
+	tab_closed.state = 'hidden';
+	tabs.push(tab_closed);
 
-	// tab receipt
+	// tab: receipt
 	bw = tab_receipt_img.width/dpi_multiple;
 	bh = tab_receipt_img.height/dpi_multiple;
 	x = width/2+bw;
 	y = height-ui_padding-bh-4;
-	tab_receipt = new Button(tab_receipt_img, x, y, bw, bh, 255);
+	tab_receipt = new Tab(tab_receipt_img, tab_receipt_selected_img, x, y, bw, bh, go_to_carrier_open);
+	tab_receipt.state = 'hidden';
+	tabs.push(tab_receipt);
 
 	// let bw = tabs_background_img.width/dpi_multiple;
 	// let bh = tabs_background_img.height/dpi_multiple;
@@ -295,12 +304,14 @@ function draw() {
 
 	let bw = tabs_background_img.width/dpi_multiple;
 	let bh = tabs_background_img.height/dpi_multiple;
-	image(tabs_background_img, width/2-bw/2, height-ui_padding-bh, bw, bh);
 
-	tab_ticket.display();
-	tab_open.display();
-	tab_closed.display();
-	tab_receipt.display();
+	if (!['init', 'unfold-bottom', 'unfold-sides'].includes(state)) {
+		image(tabs_background_img, width/2-bw/2, height-ui_padding-bh, bw, bh);
+	}
+
+	tabs.forEach(tab => {
+		tab.display();
+	});
 
 	if (state === 'init') {
 		if (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800 && card_opacity === 255) {
@@ -325,62 +336,118 @@ function draw() {
 		} else {
 			card_left_rotateY = 0.05*PI;
 			card_right_rotateY = -0.05*PI;
-			state = 'carrier-front';
+			state = 'carrier-open-front';
+			tabs.forEach(tab => {
+				tab.state = 'default';
+			});
+			tab_open.state = 'selected';
 		}
-	} else if (state === 'carrier-front') {
+	} else if (state === 'carrier-open-front') {
 		move_camera_eyeZ();
-	} else if (state === 'carrier-front-to-back-reset') {
+	} else if (state === 'carrier-open-front-to-back-reset') {
 		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800)) {
-			state = 'carrier-front-to-back';
+			// console.log(card_opacity, cam.eyeX, cam.eyeY, cam.eyeZ);
+			state = 'carrier-open-front-to-back';
 			cam.setPosition(0, 0, 800);
 			target_eyeZ = -800;
 		} else {
-			card_opacity = Math.max(0, card_opacity-15);
+			card_opacity = Math.max(0, card_opacity-25);
 		}
-	} else if (state === 'carrier-front-to-back') {
-		let a = cam_angle + 0.01*PI;
+	} else if (state === 'carrier-open-front-to-back') {
+		let a = (cam_angle+0.01*PI)%(2*PI);
 		if (card_opacity === 255 && a > 1.5*PI) {
 			cam_angle = 1.5*PI;
 			cam.setPosition(0, 0, -800);
-			state = 'carrier-back';
+			state = 'carrier-open-back';
 		} else {
 			cam_angle = a;
 			let ax = 800*cos(cam_angle);
 			let az = 800*sin(cam_angle);
 			cam.setPosition(ax, 0, az);
-			card_opacity = Math.min(255, card_opacity+5);
+			card_opacity = Math.min(255, card_opacity+3);
 		}
 		cam.lookAt(0, 0, 0);
-	} else if (state === 'carrier-back') {
+	} else if (state === 'carrier-open-back') {
 		move_camera_eyeZ();
-	} else if (state === 'carrier-back-to-front-reset') {
+	} else if (state === 'carrier-open-back-to-front-reset') {
 		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === -800)) {
-			state = 'carrier-back-to-front';
+			state = 'carrier-open-back-to-front';
 			cam.setPosition(0, 0, -800);
 			target_eyeZ = 800;
 		} else {
-			card_opacity = Math.max(0, card_opacity-15);
+			card_opacity = Math.max(0, card_opacity-25);
 		}
-	} else if (state === 'carrier-back-to-front') {
-		let a = cam_angle - 0.01*PI;
-		if (card_opacity === 255 && a < 0.5*PI) {
+	} else if (state === 'carrier-open-back-to-front') {
+		let a = (cam_angle+0.01*PI)%(2*PI);
+		if (card_opacity === 255 && a >= 0.5*PI && a <= 0.6*PI) {
 			cam_angle = 0.5*PI;
 			cam.setPosition(0, 0, 800);
-			state = 'carrier-front';
+			state = 'carrier-open-front';
 		} else {
 			cam_angle = a;
 			let ax = 800*cos(cam_angle);
 			let az = 800*sin(cam_angle);
 			cam.setPosition(ax, 0, az);
-			card_opacity = Math.min(255, card_opacity+5);
+			card_opacity = Math.min(255, card_opacity+3);
 		}
 		cam.lookAt(0, 0, 0);
-	}
+	} else if (state === 'carrier-closed-front') {
+		move_camera_eyeZ();
+	} else if (state === 'carrier-closed-front-to-back-reset') {
+		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800)) {
+			state = 'carrier-closed-front-to-back';
+			cam.setPosition(0, 0, 800);
+			target_eyeZ = -800;
+		} else {
+			card_opacity = Math.max(0, card_opacity-25);
+		}
+	} else if (state === 'carrier-closed-front-to-back') {
+		let a = (cam_angle+0.01*PI)%(2*PI);
+		if (card_opacity === 255 && a > 1.5*PI) {
+			cam_angle = 1.5*PI;
+			cam.setPosition(0, 0, -800);
+			state = 'carrier-closed-back';
+		} else {
+			cam_angle = a;
+			let ax = 800*cos(cam_angle);
+			let az = 800*sin(cam_angle);
+			cam.setPosition(ax, 0, az);
+			card_opacity = Math.min(255, card_opacity+3);
+		}
+		cam.lookAt(0, 0, 0);
+	} else if (state === 'carrier-closed-back') {
+		move_camera_eyeZ();
+	} else if (state === 'carrier-closed-back-to-front-reset') {
+		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === -800)) {
+			state = 'carrier-closed-back-to-front';
+			cam.setPosition(0, 0, -800);
+			target_eyeZ = 800;
+		} else {
+			card_opacity = Math.max(0, card_opacity-25);
+		}
+	} else if (state === 'carrier-closed-back-to-front') {
+		let a = (cam_angle+0.01*PI)%(2*PI);
+		if (card_opacity === 255 && a >= 0.5*PI && a <= 0.6*PI) {
+			cam_angle = 0.5*PI;
+			cam.setPosition(0, 0, 800);
+			state = 'carrier-closed-front';
+		} else {
+			cam_angle = a;
+			let ax = 800*cos(cam_angle);
+			let az = 800*sin(cam_angle);
+			cam.setPosition(ax, 0, az);
+			card_opacity = Math.min(255, card_opacity+3);
+		}
+		cam.lookAt(0, 0, 0);
+	} 
+
+
+
 
 	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
 		cursor('pointer');
 	} else if (tab_ticket.is_hovered() || tab_open.is_hovered() || tab_closed.is_hovered() || tab_receipt.is_hovered()) {
-		cursor('pointer');
+		// cursor('pointer');
 	} else if (isDragging){
 		cursor('grabbing');
 	} else {
@@ -403,57 +470,37 @@ function draw() {
 }
 
 function mousePressed() {
+
+
+	tabs.forEach(tab => {
+		if (tab.is_hovered()) {
+			console.log('hey');
+			tab.clicked();
+		}
+	});
+
 	// zoom in button
 	if (zoom_in_button.is_hovered()) {
-		if (state === 'carrier-front') {
-			let z = cam.eyeZ - 50;
-			if (z > max_eyeZ) {
-				target_eyeZ = max_eyeZ;
-			} else if (z < min_eyeZ) {
-				target_eyeZ = min_eyeZ;
-			} else {
-				target_eyeZ = z;
-			}
-		} else if (state === 'carrier-back') {
-			let z = cam.eyeZ + 50;
-			if (z < -max_eyeZ) {
-				target_eyeZ = -max_eyeZ;
-			} else if (z > -min_eyeZ) {
-				target_eyeZ = -min_eyeZ;
-			} else {
-				target_eyeZ = z;
-			}
-		}
+		zoom_in();
 	// zoom out button
 	} else if (zoom_out_button.is_hovered()) {
-		if (state === 'carrier-front') {
-			let z = cam.eyeZ + 50;
-			if (z > max_eyeZ) {
-				target_eyeZ = max_eyeZ;
-			} else if (z < min_eyeZ) {
-				target_eyeZ = min_eyeZ;
-			} else {
-				target_eyeZ = z;
-			}
-		} else if (state === 'carrier-back') {
-			let z = cam.eyeZ - 50;
-			if (z < -max_eyeZ) {
-				target_eyeZ = -max_eyeZ;
-			} else if (z > -min_eyeZ) {
-				target_eyeZ = -min_eyeZ;
-			} else {
-				target_eyeZ = z;
-			}
-		}
+		zoom_out();
 	// rotate button
 	} else if (rotate_button.is_hovered()) {
-		if (state === 'carrier-front') {
-			state = 'carrier-front-to-back-reset';
+		if (state === 'carrier-open-front') {
+			state = 'carrier-open-front-to-back-reset';
 			target_eyeZ = 800;
-		} else if (state === 'carrier-back') {
-			state = 'carrier-back-to-front-reset';
+		} else if (state === 'carrier-open-back') {
+			state = 'carrier-open-back-to-front-reset';
+			target_eyeZ = -800;
+		} else if (state === 'carrier-closed-front') {
+			state = 'carrier-closed-front-to-back-reset';
+			target_eyeZ = 800;
+		} else if (state === 'carrier-closed-back') {
+			state = 'carrier-closed-back-to-front-reset';
 			target_eyeZ = -800;
 		}
+			
 	} else {
 		isDragging = true;
 		cursor('grabbing');
@@ -466,7 +513,7 @@ function mouseReleased() {
 }
 
 function mouseWheel(event) {
-	if (state === 'carrier-front') {
+	if (state === 'carrier-open-front') {
 		let z = cam.eyeZ + event.delta;
 		if (z > max_eyeZ) {
 			target_eyeZ = max_eyeZ;
@@ -476,7 +523,7 @@ function mouseWheel(event) {
 			target_eyeZ = z;
 		}
 		cam.setPosition(cam.eyeX, cam.eyeY, target_eyeZ);
-	} else if (state === 'carrier-back') {
+	} else if (state === 'carrier-open-back') {
 		let z = cam.eyeZ + event.delta;
 		if (z < -max_eyeZ) {
 			target_eyeZ = -max_eyeZ;
@@ -501,70 +548,35 @@ function touchEnded() {
 	isTouching = false;
 	// zoom in button
 	if (zoom_in_button.is_hovered()) {
-		if (state === 'carrier-front') {
-			let z = cam.eyeZ - 50;
-			if (z > max_eyeZ) {
-				target_eyeZ = max_eyeZ;
-			} else if (z < min_eyeZ) {
-				target_eyeZ = min_eyeZ;
-			} else {
-				target_eyeZ = z;
-			}
-		} else if (state === 'carrier-back') {
-			let z = cam.eyeZ + 50;
-			if (z < -max_eyeZ) {
-				target_eyeZ = -max_eyeZ;
-			} else if (z > -min_eyeZ) {
-				target_eyeZ = -min_eyeZ;
-			} else {
-				target_eyeZ = z;
-			}
-		}
+		zoom_in();
 	// zoom out button
 	} else if (zoom_out_button.is_hovered()) {
-		if (state === 'carrier-front') {
-			let z = cam.eyeZ + 50;
-			if (z > max_eyeZ) {
-				target_eyeZ = max_eyeZ;
-			} else if (z < min_eyeZ) {
-				target_eyeZ = min_eyeZ;
-			} else {
-				target_eyeZ = z;
-			}
-		} else if (state === 'carrier-back') {
-			let z = cam.eyeZ - 50;
-			if (z < -max_eyeZ) {
-				target_eyeZ = -max_eyeZ;
-			} else if (z > -min_eyeZ) {
-				target_eyeZ = -min_eyeZ;
-			} else {
-				target_eyeZ = z;
-			}
-		}
+		zoom_out();
 	// rotate button
 	} else if (rotate_button.is_hovered()) {
-		if (state === 'carrier-front') {
-			state = 'carrier-front-to-back-reset';
+		if (state === 'carrier-open-front') {
+			state = 'carrier-open-front-to-back-reset';
 			target_eyeZ = 800;
-		} else if (state === 'carrier-back') {
-			state = 'carrier-back-to-front-reset';
+		} else if (state === 'carrier-open-back') {
+			state = 'carrier-open-back-to-front-reset';
 			target_eyeZ = -800;
 		}
 	}
 }
 
 function move_camera_eyeZ() {
+	let s = 5;
 	if (target_eyeZ > cam.eyeZ) {
-		if (target_eyeZ - cam.eyeZ < 4) {
+		if (target_eyeZ - cam.eyeZ < s) {
 			cam.setPosition(cam.eyeX, cam.eyeY, target_eyeZ);
 		} else {
-			cam.setPosition(cam.eyeX, cam.eyeY, cam.eyeZ + 4);
+			cam.setPosition(cam.eyeX, cam.eyeY, cam.eyeZ + s);
 		}
 	} else if (target_eyeZ < cam.eyeZ) {
-		if (cam.eyeZ - target_eyeZ < 4) {
+		if (cam.eyeZ - target_eyeZ < s) {
 			cam.setPosition(cam.eyeX, cam.eyeY, target_eyeZ);
 		} else {
-			cam.setPosition(cam.eyeX, cam.eyeY, cam.eyeZ - 4);
+			cam.setPosition(cam.eyeX, cam.eyeY, cam.eyeZ - s);
 		}
 	}
 }
@@ -615,6 +627,82 @@ function windowResized() {
 	rotate_button.position(ui_padding, ui_padding);
 }
 
+function zoom_in() {
+	d = (is_mobile) ? 100 : 50;
+	if (['carrier-open-front', 'carrier-closed-front'].includes(state)) {
+		let z = cam.eyeZ - d;
+		if (z > max_eyeZ) {
+			target_eyeZ = max_eyeZ;
+		} else if (z < min_eyeZ) {
+			target_eyeZ = min_eyeZ;
+		} else {
+			target_eyeZ = z;
+		}
+	} else if (['carrier-open-back', 'carrier-closed-back'].includes(state)) {
+		let z = cam.eyeZ + d;
+		if (z < -max_eyeZ) {
+			target_eyeZ = -max_eyeZ;
+		} else if (z > -min_eyeZ) {
+			target_eyeZ = -min_eyeZ;
+		} else {
+			target_eyeZ = z;
+		}
+	}
+}
+
+function zoom_out() {
+	d = (is_mobile) ? 100 : 50;
+	if (['carrier-open-front', 'carrier-closed-front'].includes(state)) {
+		let z = cam.eyeZ + d;
+		if (z > max_eyeZ) {
+			target_eyeZ = max_eyeZ;
+		} else if (z < min_eyeZ) {
+			target_eyeZ = min_eyeZ;
+		} else {
+			target_eyeZ = z;
+		}
+	} else if (['carrier-open-back', 'carrier-closed-back'].includes(state)) {
+		let z = cam.eyeZ - d;
+		if (z < -max_eyeZ) {
+			target_eyeZ = -max_eyeZ;
+		} else if (z > -min_eyeZ) {
+			target_eyeZ = -min_eyeZ;
+		} else {
+			target_eyeZ = z;
+		}
+	}
+}
+
+function go_to_carrier_open() {
+	state = 'carrier-open-front';
+	tabs.forEach(tab => {
+		tab.state = 'default';
+	});
+	tab_open.state = 'selected';
+	card_left_rotateY = 0.05*PI;
+	card_right_rotateY = -0.05*PI;
+	card_bottom_rotateX = 0.2*PI;
+	cam.setPosition(0, 0, 800);
+	cam.lookAt(0, 0, 0);
+	cam_angle = 0.5*PI;
+	target_eyeZ = 800;
+}
+
+function go_to_carrier_closed() {
+	state = 'carrier-closed-front';
+	tabs.forEach(tab => {
+		tab.state = 'default';
+	});
+	tab_closed.state = 'selected';
+	card_left_rotateY = PI;
+	card_right_rotateY = -PI;
+	card_bottom_rotateX = 0.99*PI;
+	cam.setPosition(0, 0, 800);
+	cam.lookAt(0, 0, 0);
+	cam_angle = 0.5*PI;
+	target_eyeZ = 800;
+}
+
 class Button {
 	constructor(img, inX, inY, inWidth, inHeight, opacity) {
 		this.x = inX;
@@ -657,13 +745,15 @@ class Button {
 }
 
 class Tab {
-	constructor(img, inX, inY, inWidth, inHeight, opacity) {
+	constructor(img_default, img_selected, inX, inY, inWidth, inHeight, go_to) {
 		this.x = inX;
 		this.y = inY;
 		this.width = inWidth;
 		this.height = inHeight;
-		this.img = img;
-		this.opacity = opacity;
+		this.img_default = img_default;
+		this.img_selected = img_selected;
+		this.go_to = go_to;
+		this.state = 'default';
 	}
 
 	position(inX, inY) {
@@ -677,22 +767,33 @@ class Tab {
 	}
 
 	display() {
-		stroke(0);
-		push();
-		if (this.is_hovered()) {
-			tint(170, 170, 170, this.opacity);
-		} else {
-			tint(255, this.opacity);
+		if (this.state != 'hidden') {
+			stroke(0);
+			push();
+			if (this.is_hovered()) {
+				tint(170, 170, 170);
+			} else {
+				tint(255);
+			}
+			let img = (this.state === 'selected') ? this.img_selected : this.img_default;
+			image(img, this.x, this.y, this.width, this.height);
+			pop();
 		}
-		image(this.img, this.x, this.y, this.width, this.height);
-		pop();
 	}
 
 	is_hovered() {
 		if ((mouseX > this.x) && (mouseX < this.x+this.width) && (mouseY > this.y) && (mouseY < this.y+this.height)) {
+			if (!['hidden'].includes(this.state)) {
+				cursor('pointer');
+			}
 			return true;
 		} else {
 			return false;
 		}
 	}
+
+	clicked() {
+		this.go_to();
+	}
 }
+
