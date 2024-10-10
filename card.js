@@ -8,8 +8,10 @@ let card_outer_left_img, card_outer_center_img, card_outer_right_img, card_outer
 let card_left_rotateY, card_right_rotateY, card_bottom_rotateX;
 
 let ticket_front_img, ticket_back_img;
+let ticket_y, ticket_z, ticket_rotateX, ticket_opacity;
 
 let receipt_top_img, receipt_bottom_img;
+let receipt_y, receipt_z, receipt_top_rotateZ, receipt_bottom_rotateX;
 
 let zoom_in_button, zoom_in_button_img;
 let zoom_out_button, zoom_out_button_img;
@@ -93,6 +95,16 @@ function setup() {
 	card_left_rotateY = PI;
 	card_right_rotateY = -PI;
 	card_bottom_rotateX = 0.99*PI;
+
+	ticket_y = 0;
+	ticket_z = 0.03;
+	ticket_rotateX = 0;
+	ticket_opacity = 255;
+
+	receipt_y = 0;
+	receipt_z = 0;
+	receipt_top_rotateZ = 0.5*PI;
+	receipt_bottom_rotateX = -PI;
 
 	// zoom in button
 	let bw = zoom_in_button_img.width/dpi_multiple;
@@ -278,12 +290,14 @@ function draw() {
 
 	// ticket front
 	canvas_3d.push();
+	canvas_3d.tint(255, 255, 255, ticket_opacity);
 	canvas_3d.texture(ticket_front_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(-w_ticket/2, -h_ticket/2, 0.03, 0, 0);                         									// Top left corner
-	canvas_3d.vertex(w_ticket/2, -h_ticket/2, 0.03, ticket_front_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(w_ticket/2, h_ticket/2, 0.03, ticket_front_img.width, ticket_front_img.height);	// Bottom right corner
-	canvas_3d.vertex(-w_ticket/2, h_ticket/2, 0.03, 0, ticket_front_img.height);          				    // Bottom left corner
+	canvas_3d.vertex(-w_ticket/2, -h_ticket/2+ticket_y, ticket_z, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(w_ticket/2, -h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w_ticket/2, h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, ticket_front_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w_ticket/2, h_ticket/2+ticket_y, ticket_z, 0, ticket_front_img.height);          				    // Bottom left corner
+	canvas_3d.rotateX(ticket_rotateX);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
@@ -309,27 +323,34 @@ function draw() {
 	canvas_3d.push();
 	canvas_3d.texture(receipt_top_img);
 	canvas_3d.beginShape();
-	canvas_3d.vertex(-w_receipt/2, -h_receipt_top/2, 0.02, 0, 0);                         									// Top left corner
-	canvas_3d.vertex(w_receipt/2, -h_receipt_top/2, 0.02, receipt_top_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(w_receipt/2, h_receipt_top/2, 0.02, receipt_top_img.width, receipt_top_img.height);	// Bottom right corner
-	canvas_3d.vertex(-w_receipt/2, h_receipt_top/2, 0.02, 0, receipt_top_img.height);          				    // Bottom left corner
-	canvas_3d.rotateZ(0.5*PI);
+	canvas_3d.vertex(-w_receipt/2, -h_receipt_top/2+receipt_y, receipt_z+0.02, 0, 0);                         									// Top left corner
+	canvas_3d.vertex(w_receipt/2, -h_receipt_top/2+receipt_y, receipt_z+0.02, receipt_top_img.width, 0);               				// Top right corner
+	canvas_3d.vertex(w_receipt/2, h_receipt_top/2+receipt_y, receipt_z+0.02, receipt_top_img.width, receipt_top_img.height);	// Bottom right corner
+	canvas_3d.vertex(-w_receipt/2, h_receipt_top/2+receipt_y, receipt_z+0.02, 0, receipt_top_img.height);          				    // Bottom left corner
+	canvas_3d.rotateZ(receipt_top_rotateZ);
 	canvas_3d.endShape(CLOSE);
 	canvas_3d.pop();
 
 	// receipt bottom
-	canvas_3d.push();
-	canvas_3d.texture(receipt_bottom_img);
-	canvas_3d.beginShape();
-	canvas_3d.vertex(-w_receipt/2, 0, 0.01, 0, 0);                         									// Top left corner
-	canvas_3d.vertex(w_receipt/2, 0, 0.01, receipt_bottom_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(w_receipt/2, h_receipt_bottom, 0.01, receipt_bottom_img.width, receipt_bottom_img.height);	// Bottom right corner
-	canvas_3d.vertex(-w_receipt/2, h_receipt_bottom, 0.01, 0, receipt_bottom_img.height);          				    // Bottom left corner
-	canvas_3d.translate(-h_receipt_top/2, 0, 0);
-	canvas_3d.rotateY(-PI);
-	canvas_3d.rotateZ(0.5*PI);
-	canvas_3d.endShape(CLOSE);
-	canvas_3d.pop();
+	if (state === 'receipt-unfold') {
+		canvas_3d.push();
+		canvas_3d.texture(receipt_bottom_img);
+		canvas_3d.beginShape();
+		canvas_3d.vertex(-w_receipt/2, 0, 0.01, 0, 0);                         									// Top left corner
+		canvas_3d.vertex(w_receipt/2, 0, 0.01, receipt_bottom_img.width, 0);               				// Top right corner
+		canvas_3d.vertex(w_receipt/2, h_receipt_bottom, 0.01, receipt_bottom_img.width, receipt_bottom_img.height);	// Bottom right corner
+		canvas_3d.vertex(-w_receipt/2, h_receipt_bottom, 0.01, 0, receipt_bottom_img.height);          				    // Bottom left corner
+		canvas_3d.translate(0, h_receipt_top/2+receipt_y, receipt_z);
+		canvas_3d.rotateX(receipt_bottom_rotateX);
+		canvas_3d.endShape(CLOSE);
+		canvas_3d.pop();
+	}
+	// 
+	// canvas_3d.translate(-h_receipt_top/2, 0, 0);
+	// canvas_3d.rotateY(receipt_bottom_rotateY);
+	// canvas_3d.rotateZ(receipt_rotateZ);
+
+
 
 
 
@@ -407,11 +428,49 @@ function draw() {
 		} else {
 			card_left_rotateY = 0.05*PI;
 			card_right_rotateY = -0.05*PI;
-			state = 'carrier-open-front';
+			state = 'ticket-out';
 			tabs.forEach(tab => {
 				tab.state = 'default';
 			});
 			tab_open.state = 'selected';
+		}
+	} else if (state === 'ticket-out') {
+		if (ticket_opacity <= 0 || ticket_y <= -1000) {
+			ticket_y = -1000;
+			ticket_opacity -= 0;
+			state = 'receipt-rise';
+		} else {
+			ticket_y -= 10;
+			if (ticket_y <= -500) {
+				ticket_opacity -= 5;
+			}
+			// ticket_z += 5;
+			// if (ticket_rotateX > -0.25*PI) {
+			// 	ticket_rotateX -= 0.0025*PI;
+			// } 
+		}
+	} else if (state === 'receipt-rise') {
+		if (receipt_z >= 200 && receipt_top_rotateZ <= 0) {
+			receipt_z = 200;
+			receipt_top_rotateZ = 0;
+			state = 'receipt-unfold';
+		} else {
+			receipt_z += 5
+			receipt_top_rotateZ -= 0.5*PI/40;
+		}
+	} else if (state === 'receipt-unfold') {
+		if (receipt_y <= -1000) {
+			receipt_y = -1000;
+			state = 'carrier-open-front';
+		} else {
+			if (receipt_bottom_rotateX >= 0) {
+				receipt_bottom_rotateX = 0
+			} else {
+				receipt_bottom_rotateX += 0.02*PI;
+			}
+			if (receipt_bottom_rotateX >= -0.1*PI) {
+				receipt_y -= 10;
+			}
 		}
 	} else if (state === 'carrier-open-front') {
 		move_camera_eyeZ();
@@ -520,7 +579,7 @@ function draw() {
 	} else if (isDragging){
 		cursor('grabbing');
 	} else {
-		cursor('grab');
+		// cursor('grab');
 	}
 
 	// Pinch-to-zoom detection (for touch)
