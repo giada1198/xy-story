@@ -151,7 +151,7 @@ function setup() {
 	bh = tab_ticket_img.height/dpi_multiple;
 	x = width/2+4;
 	y = height-ui_padding-bh-4;
-	tab_ticket = new Tab(tab_ticket_img, tab_ticket_selected_img, x, y, bw, bh, 255);
+	tab_ticket = new Tab(tab_ticket_img, tab_ticket_selected_img, x, y, bw, bh, go_to_ticket);
 	tab_ticket.state = 'hidden';
 	tabs.push(tab_ticket);
 
@@ -168,7 +168,7 @@ function setup() {
 function draw() {
 	background(0);
 	canvas_3d.clear();
-	if (state !== 'ticket-front' && state !== 'receipt') {
+	if (!['ticket-front', 'ticket-front-to-back-reset', 'ticket-front-to-back', 'ticket-back', 'ticket-back-to-front-reset', 'ticket-back-to-front','receipt'].includes(state)) {
 		// card center dimensions
 		let w_center = (is_mobile) ? width*(510/1020) : card_inner_center_img.width/dpi_multiple;
 		let h_center = (is_mobile) ? w_center*(card_inner_center_img.height/card_inner_center_img.width) : card_inner_center_img.height/dpi_multiple;
@@ -286,34 +286,39 @@ function draw() {
 		canvas_3d.pop();
 	}
 
-	// ticket dimensions
-	let w_ticket = (is_mobile) ? width*(450/1020) : ticket_front_img.width/dpi_multiple;
-	let h_ticket = (is_mobile) ? w_ticket*(ticket_front_img.height/ticket_front_img.width) : ticket_front_img.height/dpi_multiple;
 
-	// ticket front
-	canvas_3d.push();
-	canvas_3d.tint(255, 255, 255, ticket_opacity);
-	canvas_3d.texture(ticket_front_img);
-	canvas_3d.beginShape();
-	canvas_3d.vertex(-w_ticket/2, -h_ticket/2+ticket_y, ticket_z, 0, 0);                         									// Top left corner
-	canvas_3d.vertex(w_ticket/2, -h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, 0);               				// Top right corner
-	canvas_3d.vertex(w_ticket/2, h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, ticket_front_img.height);	// Bottom right corner
-	canvas_3d.vertex(-w_ticket/2, h_ticket/2+ticket_y, ticket_z, 0, ticket_front_img.height);          				    // Bottom left corner
-	canvas_3d.rotateX(ticket_rotateX);
-	canvas_3d.endShape(CLOSE);
-	canvas_3d.pop();
 
-	// ticket back
-	if (state === 'ticket') {
+	
+	if (['unfold-sides', 'ticket-out', 'ticket-front', 'ticket-front-to-back-reset', 'ticket-front-to-back', 'ticket-back', 'ticket-back-to-front-reset', 'ticket-back-to-front'].includes(state)) {
+		// ticket dimensions
+		let w_ticket = (is_mobile) ? width*(450/1020) : ticket_front_img.width/dpi_multiple;
+		let h_ticket = (is_mobile) ? w_ticket*(ticket_front_img.height/ticket_front_img.width) : ticket_front_img.height/dpi_multiple;
+
+		// ticket front
 		canvas_3d.push();
-		canvas_3d.texture(ticket_back_img);
+		canvas_3d.tint(255, 255, 255, ticket_opacity);
+		canvas_3d.texture(ticket_front_img);
 		canvas_3d.beginShape();
-		canvas_3d.vertex(w_ticket/2, -h_ticket/2, 0, 0, 0);                         									// Top left corner
-		canvas_3d.vertex(-w_ticket/2, -h_ticket/2, 0, ticket_back_img.width, 0);               				// Top right corner
-		canvas_3d.vertex(-w_ticket/2, h_ticket/2, 0, ticket_back_img.width, ticket_back_img.height);	// Bottom right corner
-		canvas_3d.vertex(w_ticket/2, h_ticket/2, 0, 0, ticket_back_img.height);          				    // Bottom left corner
+		canvas_3d.vertex(-w_ticket/2, -h_ticket/2+ticket_y, ticket_z, 0, 0);                         									// Top left corner
+		canvas_3d.vertex(w_ticket/2, -h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, 0);               				// Top right corner
+		canvas_3d.vertex(w_ticket/2, h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, ticket_front_img.height);	// Bottom right corner
+		canvas_3d.vertex(-w_ticket/2, h_ticket/2+ticket_y, ticket_z, 0, ticket_front_img.height);          				    // Bottom left corner
+		// canvas_3d.rotateX(ticket_rotateX);
 		canvas_3d.endShape(CLOSE);
 		canvas_3d.pop();
+
+		// ticket back
+		if (['ticket-front-to-back', 'ticket-back', 'ticket-back-to-front-reset', 'ticket-back-to-front'].includes(state)) {
+			canvas_3d.push();
+			canvas_3d.texture(ticket_back_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(w_ticket/2, -h_ticket/2, -0.01, 0, 0);                         									// Top left corner
+			canvas_3d.vertex(-w_ticket/2, -h_ticket/2, -0.01, ticket_back_img.width, 0);               				// Top right corner
+			canvas_3d.vertex(-w_ticket/2, h_ticket/2, -0.01, ticket_back_img.width, ticket_back_img.height);	// Bottom right corner
+			canvas_3d.vertex(w_ticket/2, h_ticket/2, -0.01, 0, ticket_back_img.height);          				    // Bottom left corner
+			canvas_3d.endShape(CLOSE);
+			canvas_3d.pop();
+		}
 	}
 
 	if (['ticket-out', 'receipt-rise', 'receipt-unfold-out', 'receipt'].includes(state)) {
@@ -366,7 +371,7 @@ function draw() {
 		let dx = touches[0].x - last_touchX;
 		let dy = touches[0].y - last_touchY;
 	
-		// Adjust camera based on touch drag
+		// adjust camera based on touch drag
 		cam.move(-dx, -dy, 0);
 	}
 
@@ -380,20 +385,22 @@ function draw() {
 	image(canvas_3d, 0, 0);
 	pop();
 
-
-
 	if (!['init', 'unfold-bottom', 'unfold-sides', 'ticket-out', 'receipt-rise', 'receipt-unfold-out'].includes(state)) {
+		// draw buttons
 		zoom_in_button.display();
 		zoom_out_button.display();
 		if (state !== 'receipt') {
 			rotate_button.display();
 		}
-		
+
+		// draw background for tabs
 		let bw = tabs_background_img.width/dpi_multiple;
 		let bh = tabs_background_img.height/dpi_multiple;
 		push();
 		image(tabs_background_img, width/2-bw/2, height-ui_padding-bh, bw, bh);
 		pop();
+
+		// draw tabs
 		tabs.forEach(tab => {
 			tab.display();
 		});
@@ -434,6 +441,7 @@ function draw() {
 			if (ticket_y <= -500) {
 				ticket_opacity -= 5;
 			}
+			// // fancy fly out path
 			// ticket_z += 5;
 			// if (ticket_rotateX > -0.25*PI) {
 			// 	ticket_rotateX -= 0.0025*PI;
@@ -567,13 +575,57 @@ function draw() {
 			card_opacity = Math.min(255, card_opacity+3);
 		}
 		cam.lookAt(0, 0, 0);
+	} else if (state === 'ticket-front') {
+		move_camera_eyeZ();
+	} else if (state === 'ticket-front-to-back-reset') {
+		if (ticket_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800)) {
+			state = 'ticket-front-to-back';
+			cam.setPosition(0, 0, 800);
+			target_eyeZ = -800;
+		} else {
+			ticket_opacity = Math.max(0, ticket_opacity-25);
+		}
+	} else if (state === 'ticket-front-to-back') {
+		let a = (cam_angle+0.01*PI)%(2*PI);
+		if (ticket_opacity === 255 && a > 1.5*PI) {
+			cam_angle = 1.5*PI;
+			cam.setPosition(0, 0, -800);
+			state = 'ticket-back';
+		} else {
+			cam_angle = a;
+			let ax = 800*cos(cam_angle);
+			let az = 800*sin(cam_angle);
+			cam.setPosition(ax, 0, az);
+			ticket_opacity = Math.min(255, ticket_opacity+3);
+		}
+		cam.lookAt(0, 0, 0);
+	} else if (state === 'ticket-back') {
+		move_camera_eyeZ();
+	} else if (state === 'ticket-back-to-front-reset') {
+		if (ticket_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === -800)) {
+			state = 'ticket-back-to-front';
+			cam.setPosition(0, 0, -800);
+			target_eyeZ = 800;
+		} else {
+			ticket_opacity = Math.max(0, ticket_opacity-25);
+		}
+	} else if (state === 'ticket-back-to-front') {
+		let a = (cam_angle+0.01*PI)%(2*PI);
+		if (ticket_opacity === 255 && a >= 0.5*PI && a <= 0.6*PI) {
+			cam_angle = 0.5*PI;
+			cam.setPosition(0, 0, 800);
+			state = 'ticket-front';
+		} else {
+			cam_angle = a;
+			let ax = 800*cos(cam_angle);
+			let az = 800*sin(cam_angle);
+			cam.setPosition(ax, 0, az);
+			ticket_opacity = Math.min(255, ticket_opacity+3);
+		}
+		cam.lookAt(0, 0, 0);
 	} else if (state === 'receipt') {
 		move_camera_eyeZ();
 	}
-
-
-
-
 	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
 		cursor('pointer');
 	} else if (isDragging){
@@ -626,6 +678,12 @@ function mousePressed() {
 			target_eyeZ = 800;
 		} else if (state === 'carrier-closed-back') {
 			state = 'carrier-closed-back-to-front-reset';
+			target_eyeZ = -800;
+		} else if (state === 'ticket-front') {
+			state = 'ticket-front-to-back-reset';
+			target_eyeZ = 800;
+		} else if (state === 'ticket-back') {
+			state = 'ticket-back-to-front-reset';
 			target_eyeZ = -800;
 		}
 	} else {
@@ -702,6 +760,12 @@ function touchEnded() {
 			target_eyeZ = 800;
 		} else if (state === 'carrier-closed-back') {
 			state = 'carrier-closed-back-to-front-reset';
+			target_eyeZ = -800;
+		} else if (state === 'ticket-front') {
+			state = 'ticket-front-to-back-reset';
+			target_eyeZ = 800;
+		} else if (state === 'ticket-back') {
+			state = 'ticket-back-to-front-reset';
 			target_eyeZ = -800;
 		}
 	}
@@ -788,7 +852,7 @@ function windowResized() {
 
 function zoom_in() {
 	d = (is_mobile) ? 100 : 70;
-	if (['carrier-open-front', 'carrier-closed-front', 'receipt'].includes(state)) {
+	if (['carrier-open-front', 'carrier-closed-front', 'ticket-front', 'receipt'].includes(state)) {
 		console.log('zoom in');
 		console.log(cam.eyeZ, target_eyeZ);
 		let z = cam.eyeZ - d;
@@ -799,7 +863,7 @@ function zoom_in() {
 		} else {
 			target_eyeZ = z;
 		}
-	} else if (['carrier-open-back', 'carrier-closed-back'].includes(state)) {
+	} else if (['carrier-open-back', 'carrier-closed-back', 'ticket-back'].includes(state)) {
 		let z = cam.eyeZ + d;
 		if (z < -max_eyeZ) {
 			target_eyeZ = -max_eyeZ;
@@ -813,7 +877,7 @@ function zoom_in() {
 
 function zoom_out() {
 	d = (is_mobile) ? 100 : 70;
-	if (['carrier-open-front', 'carrier-closed-front', 'receipt'].includes(state)) {
+	if (['carrier-open-front', 'carrier-closed-front', 'ticket-front', 'receipt'].includes(state)) {
 		let z = cam.eyeZ + d;
 		if (z > max_eyeZ) {
 			target_eyeZ = max_eyeZ;
@@ -822,7 +886,7 @@ function zoom_out() {
 		} else {
 			target_eyeZ = z;
 		}
-	} else if (['carrier-open-back', 'carrier-closed-back'].includes(state)) {
+	} else if (['carrier-open-back', 'carrier-closed-back', 'ticket-back'].includes(state)) {
 		let z = cam.eyeZ - d;
 		if (z < -max_eyeZ) {
 			target_eyeZ = -max_eyeZ;
@@ -858,6 +922,22 @@ function go_to_carrier_closed() {
 	card_left_rotateY = PI;
 	card_right_rotateY = -PI;
 	card_bottom_rotateX = 0.99*PI;
+	cam.setPosition(0, 0, 800);
+	cam.lookAt(0, 0, 0);
+	cam_angle = 0.5*PI;
+	target_eyeZ = 800;
+}
+
+function go_to_ticket() {
+	state = 'ticket-front';
+	tabs.forEach(tab => {
+		tab.state = 'default';
+	});
+	tab_ticket.state = 'selected';
+	ticket_y = 0;
+	ticket_z = 0;
+	ticket_rotateX = 0;
+	ticket_opacity = 255;
 	cam.setPosition(0, 0, 800);
 	cam.lookAt(0, 0, 0);
 	cam_angle = 0.5*PI;
