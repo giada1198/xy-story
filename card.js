@@ -612,7 +612,12 @@ function draw() {
 			let dx = (mouseX-lastX)*(n/800);
 			let dy = (mouseY-lastY)*(n/800);
 			// adjust camera based on touch drag
-			let eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
+			let eyeX;
+			if (['carrier-open-front', 'carrier-closed-front', 'ticket-front', 'receipt'].includes(state)) {
+				eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
+			} else if (['carrier-open-back', 'carrier-closed-back', 'ticket-back'].includes(state)) {
+				eyeX = Math.min(Math.max(cam.eyeX+dx, -510*scale), 510*scale);
+			}
 			let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
 			cam.setPosition(eyeX, eyeY, cam.eyeZ);
 			// cam.move(-dx*(d/800), -dy*(d/800), 0);
@@ -626,7 +631,12 @@ function draw() {
 			let dx = (touches[0].x-last_touchX)*(n/800);
 			let dy = (touches[0].y-last_touchY)*(n/800);
 			// adjust camera based on touch drag
-			let eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
+			let eyeX;
+			if (['carrier-open-front', 'carrier-closed-front', 'ticket-front', 'receipt'].includes(state)) {
+				eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
+			} else if (['carrier-open-back', 'carrier-closed-back', 'ticket-back'].includes(state)) {
+				eyeX = Math.min(Math.max(cam.eyeX+dx, -510*scale), 510*scale);
+			}
 			let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
 			cam.setPosition(eyeX, eyeY, cam.eyeZ);
 			// cam.move(-dx, -dy, 0);
