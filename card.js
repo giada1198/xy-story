@@ -311,12 +311,13 @@ function draw() {
 		// ticket back
 		if (['ticket-front-to-back', 'ticket-back', 'ticket-back-to-front-reset', 'ticket-back-to-front'].includes(state)) {
 			canvas_3d.push();
+			canvas_3d.tint(255, 255, 255, ticket_opacity);
 			canvas_3d.texture(ticket_back_img);
 			canvas_3d.beginShape();
-			canvas_3d.vertex(w_ticket/2, -h_ticket/2, -0.01, 0, 0);                         									// Top left corner
-			canvas_3d.vertex(-w_ticket/2, -h_ticket/2, -0.01, ticket_back_img.width, 0);               				// Top right corner
-			canvas_3d.vertex(-w_ticket/2, h_ticket/2, -0.01, ticket_back_img.width, ticket_back_img.height);	// Bottom right corner
-			canvas_3d.vertex(w_ticket/2, h_ticket/2, -0.01, 0, ticket_back_img.height);          				    // Bottom left corner
+			canvas_3d.vertex(w_ticket/2, -h_ticket/2, -0.01, 0, 0);
+			canvas_3d.vertex(-w_ticket/2, -h_ticket/2, -0.01, ticket_back_img.width, 0);
+			canvas_3d.vertex(-w_ticket/2, h_ticket/2, -0.01, ticket_back_img.width, ticket_back_img.height);
+			canvas_3d.vertex(w_ticket/2, h_ticket/2, -0.01, 0, ticket_back_img.height);
 			canvas_3d.endShape(CLOSE);
 			canvas_3d.pop();
 		}
@@ -333,10 +334,10 @@ function draw() {
 		canvas_3d.tint(255, 255, 255, receipt_opacity);
 		canvas_3d.texture(receipt_top_img);
 		canvas_3d.beginShape();
-		canvas_3d.vertex(-w_receipt/2, -h_receipt_top/2+receipt_y, receipt_z+0.02, 0, 0);                         									// Top left corner
-		canvas_3d.vertex(w_receipt/2, -h_receipt_top/2+receipt_y, receipt_z+0.02, receipt_top_img.width, 0);               				// Top right corner
-		canvas_3d.vertex(w_receipt/2, h_receipt_top/2+receipt_y, receipt_z+0.02, receipt_top_img.width, receipt_top_img.height);	// Bottom right corner
-		canvas_3d.vertex(-w_receipt/2, h_receipt_top/2+receipt_y, receipt_z+0.02, 0, receipt_top_img.height);          				    // Bottom left corner
+		canvas_3d.vertex(-w_receipt/2, -h_receipt_top/2+receipt_y, receipt_z+0.02, 0, 0);
+		canvas_3d.vertex(w_receipt/2, -h_receipt_top/2+receipt_y, receipt_z+0.02, receipt_top_img.width, 0);
+		canvas_3d.vertex(w_receipt/2, h_receipt_top/2+receipt_y, receipt_z+0.02, receipt_top_img.width, receipt_top_img.height);
+		canvas_3d.vertex(-w_receipt/2, h_receipt_top/2+receipt_y, receipt_z+0.02, 0, receipt_top_img.height);
 		canvas_3d.rotateZ(receipt_top_rotateZ);
 		canvas_3d.endShape(CLOSE);
 		canvas_3d.pop();
@@ -410,13 +411,13 @@ function draw() {
 			state = 'ticket-out';
 		}
 	} else if (state === 'ticket-out') {
-		if (ticket_opacity <= 0 || ticket_y <= -1000) {
-			ticket_y = -1000;
+		if (ticket_opacity <= 0 || ticket_y <= -1000*scale) {
+			ticket_y = -1000*scale;
 			ticket_opacity -= 0;
 			state = 'receipt-rise';
 		} else {
-			ticket_y -= 10;
-			if (ticket_y <= -500) {
+			ticket_y -= 10*scale;
+			if (ticket_y <= -500*scale) {
 				ticket_opacity -= 5;
 			}
 			// // fancy fly out path
@@ -426,17 +427,17 @@ function draw() {
 			// } 
 		}
 	} else if (state === 'receipt-rise') {
-		if (receipt_z >= 200 && receipt_top_rotateZ <= 0) {
-			receipt_z = 200;
+		if (receipt_z >= 200*scale && receipt_top_rotateZ <= 0) {
+			receipt_z = 200*scale;
 			receipt_top_rotateZ = 0;
 			state = 'receipt-unfold-out';
 		} else {
-			receipt_z += 5
+			receipt_z += 5*scale
 			receipt_top_rotateZ -= 0.5*PI/40;
 		}
 	} else if (state === 'receipt-unfold-out') {
-		if (receipt_opacity <= 0 || receipt_y <= -1000) {
-			receipt_y = -1000;
+		if (receipt_opacity <= 0 || receipt_y <= -1000*scale) {
+			receipt_y = -1000*scale;
 			ticket_opacity -= 0;
 			state = 'carrier-open-front';
 			tabs.forEach(tab => {
@@ -450,8 +451,8 @@ function draw() {
 				receipt_bottom_rotateX += 0.02*PI;
 			}
 			if (receipt_bottom_rotateX >= -0.1*PI) {
-				receipt_y -= 10;
-				if (receipt_y <= -500) {
+				receipt_y -= 10*scale;
+				if (receipt_y <= -500*scale) {
 					receipt_opacity -= 5;
 				}
 			}
@@ -638,7 +639,7 @@ function draw() {
 			last_touchY = touches[0].y;
 		}
 	}
-	
+
 	// cursor
 	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
 		cursor('pointer');
