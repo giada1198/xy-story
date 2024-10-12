@@ -413,7 +413,6 @@ function draw() {
 			state = 'ticket-out';
 		}
 	} else if (state === 'ticket-out') {
-		console.log(ticket_opacity);
 		if (ticket_opacity <= 0 || ticket_y <= -1000*scale) {
 			ticket_y = -1000*scale;
 			ticket_opacity = 0;
@@ -624,7 +623,7 @@ function draw() {
 			let eyeY = Math.min(Math.max(cam.eyeY-dy, -280*scale), 400*scale);
 			cam.setPosition(eyeX, eyeY, cam.eyeZ);
 			// cam.move(-dx*(d/800), -dy*(d/800), 0);
-			console.log('drag', eyeX, eyeY);
+			// console.log('drag', eyeX, eyeY);
 		}
 		lastX = mouseX;
 		lastY = mouseY;
@@ -643,8 +642,7 @@ function draw() {
 			let eyeY = Math.min(Math.max(cam.eyeY-dy, -280*scale), 400*scale);
 			cam.setPosition(eyeX, eyeY, cam.eyeZ);
 			// cam.move(-dx, -dy, 0);
-			console.log('touch', eyeX, eyeY);
-			console.log(scale);
+			// console.log('touch', eyeX, eyeY);
 		}
 	
 		if (touches.length > 0) {
@@ -871,8 +869,8 @@ function windowResized() {
 function zoom_in() {
 	d = (is_mobile) ? 150 : 75;
 	if (['carrier-open-front', 'carrier-closed-front', 'ticket-front', 'receipt'].includes(state)) {
-		console.log('zoom in');
-		console.log(cam.eyeZ, target_eyeZ);
+		// console.log('zoom in');
+		// console.log(cam.eyeZ, target_eyeZ);
 		let z = cam.eyeZ - d;
 		if (z > max_eyeZ) {
 			target_eyeZ = max_eyeZ;
