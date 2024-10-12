@@ -2,6 +2,7 @@ let state = 'init';
 let is_mobile;
 
 let canvas_3d;
+let cam;
 
 let card_inner_left_img, card_inner_center_img, card_inner_right_img, card_inner_bottom_img;
 let card_outer_left_img, card_outer_center_img, card_outer_right_img, card_outer_bottom_img;
@@ -23,7 +24,9 @@ let tab_closed, tab_closed_img, tab_closed_selected_img;
 let tab_receipt, tab_receipt_img, tab_receipt_selected_img;
 let tabs_background_img;
 
-let cam;
+
+let scale;
+
 let isDragging = false;
 let is_touching = false;
 let lastX, lastY;
@@ -82,6 +85,7 @@ function setup() {
 	is_mobile = (windowWidth <= 1020) ? true : false;
 	let w = Math.max(320, windowWidth);
 	let h = Math.max(240, windowHeight);
+	scale = w/1020;
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
 	canvas_3d.noStroke();
@@ -355,22 +359,30 @@ function draw() {
 	}
 
 	if (isDragging) {
-		let dx = mouseX - lastX;
-		let dy = mouseY - lastY;
-		let d = Math.abs(cam.eyeZ);
-		cam.move(-dx*(d/800), -dy*(d/800), 0);
-		console.log('drag', dx, dy);
+		let n = Math.abs(cam.eyeZ);
+		let dx = (mouseX-lastX)*(n/800);
+		let dy = (mouseY-lastY)*(n/800);
+		// adjust camera based on touch drag
+		let eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
+		let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
+		cam.setPosition(eyeX, eyeY, cam.eyeZ);
+		// cam.move(-dx*(d/800), -dy*(d/800), 0);
+		console.log('drag', eyeX, eyeY);
 	}
 	lastX = mouseX;
 	lastY = mouseY;
 
 	if (is_touching && touches.length > 0) {
-		let dx = touches[0].x - last_touchX;
-		let dy = touches[0].y - last_touchY;
+		let n = Math.abs(cam.eyeZ);
+		let dx = (touches[0].x-last_touchX)*(n/800);
+		let dy = (touches[0].y-last_touchY)*(n/800);
 		// adjust camera based on touch drag
-		let d = Math.abs(cam.eyeZ);
-		cam.move(-dx*(d/800), -dy*(d/800), 0);
-		console.log('touch', dx, dy);
+		let eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
+		let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
+		cam.setPosition(eyeX, eyeY, cam.eyeZ);
+		// cam.move(-dx, -dy, 0);
+		console.log('touch', eyeX, eyeY);
+		console.log(scale);
 	}
 
 	if (touches.length > 0) {
@@ -624,27 +636,13 @@ function draw() {
 	} else if (state === 'receipt') {
 		move_camera_eyeZ();
 	}
+
+	// cursor
 	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
 		cursor('pointer');
 	} else if (isDragging){
 		cursor('grabbing');
-	} else {
-		// cursor('grab');
 	}
-
-	// Pinch-to-zoom detection (for touch)
-	// if (touches.length == 2) {
-	// 	let currDist = dist(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
-		
-	// 	if (prevDist > 0) {
-	// 		let zoomAmount = (prevDist - currDist) * 0.05; // Sensitivity for zoom
-	// 		cam.move(0, 0, zoomAmount);  // Adjust camera zoom along Z-axis
-	// 	}
-		
-	// 	prevDist = currDist;  // Update previous distance for next frame
-	// } else {
-	// 	prevDist = -1;  // Reset when not pinching
-	// }
 }
 
 function mousePressed() {
@@ -696,7 +694,7 @@ function mouseReleased() {
 }
 
 function mouseWheel(event) {
-	if (state === 'carrier-open-front') {
+	if (['carrier-open-front', 'carrier-closed-front', 'ticket-front', 'receipt'].includes(state)) {
 		let z = cam.eyeZ + event.delta;
 		if (z > max_eyeZ) {
 			target_eyeZ = max_eyeZ;
@@ -706,7 +704,7 @@ function mouseWheel(event) {
 			target_eyeZ = z;
 		}
 		cam.setPosition(cam.eyeX, cam.eyeY, target_eyeZ);
-	} else if (state === 'carrier-open-back') {
+	} else if (['carrier-open-back', 'carrier-closed-back', 'ticket-back'].includes(state)) {
 		let z = cam.eyeZ + event.delta;
 		if (z < -max_eyeZ) {
 			target_eyeZ = -max_eyeZ;
@@ -820,6 +818,7 @@ function windowResized() {
 	is_mobile = (windowWidth <= 1020) ? true : false;
 	let w = Math.max(320, windowWidth);
 	let h = Math.max(240, windowHeight);
+	scale = w/1020;
 	resizeCanvas(w, h);
 	canvas_3d.resizeCanvas(w, h);
 	ui_padding = (is_mobile) ? 16 : 24;
@@ -846,10 +845,15 @@ function windowResized() {
 	x = w/2+bw;
 	y = h-ui_padding-bh-4;
 	tab_receipt.position(x, y);
+
+	// reposition receipt
+	if (state === 'receipt') {
+		receipt_y = -180*scale;
+	}
 }
 
 function zoom_in() {
-	d = (is_mobile) ? 100 : 70;
+	d = (is_mobile) ? 150 : 75;
 	if (['carrier-open-front', 'carrier-closed-front', 'ticket-front', 'receipt'].includes(state)) {
 		console.log('zoom in');
 		console.log(cam.eyeZ, target_eyeZ);
@@ -874,7 +878,7 @@ function zoom_in() {
 }
 
 function zoom_out() {
-	d = (is_mobile) ? 100 : 70;
+	d = (is_mobile) ? 150 : 75;
 	if (['carrier-open-front', 'carrier-closed-front', 'ticket-front', 'receipt'].includes(state)) {
 		let z = cam.eyeZ + d;
 		if (z > max_eyeZ) {
@@ -1042,7 +1046,7 @@ function go_to_receipt() {
 		tab.state = 'default';
 	});
 	tab_receipt.state = 'selected';
-	receipt_y = 0;
+	receipt_y = -180*scale;
 	receipt_z = 0;
 	receipt_opacity = 255;
 	receipt_top_rotateZ = 0;
