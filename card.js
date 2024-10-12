@@ -25,7 +25,7 @@ let tabs_background_img;
 
 let cam;
 let isDragging = false;
-let isTouching = false;
+let is_touching = false;
 let lastX, lastY;
 let last_touchX, last_touchY;
 
@@ -285,9 +285,6 @@ function draw() {
 		canvas_3d.endShape(CLOSE);
 		canvas_3d.pop();
 	}
-
-
-
 	
 	if (['unfold-sides', 'ticket-out', 'ticket-front', 'ticket-front-to-back-reset', 'ticket-front-to-back', 'ticket-back', 'ticket-back-to-front-reset', 'ticket-back-to-front'].includes(state)) {
 		// ticket dimensions
@@ -360,19 +357,20 @@ function draw() {
 	if (isDragging) {
 		let dx = mouseX - lastX;
 		let dy = mouseY - lastY;
-		// cam.pan(-dx * 0.005);  // Horizontal movement
-		// cam.tilt(dy * 0.005);  // Vertical movement
-		cam.move(-dx, -dy, 0);
+		let d = Math.abs(cam.eyeZ);
+		cam.move(-dx*(d/800), -dy*(d/800), 0);
+		console.log('drag', dx, dy);
 	}
 	lastX = mouseX;
 	lastY = mouseY;
 
-	if (isTouching && touches.length > 0) {
+	if (is_touching && touches.length > 0) {
 		let dx = touches[0].x - last_touchX;
 		let dy = touches[0].y - last_touchY;
-	
 		// adjust camera based on touch drag
-		cam.move(-dx, -dy, 0);
+		let d = Math.abs(cam.eyeZ);
+		cam.move(-dx*(d/800), -dy*(d/800), 0);
+		console.log('touch', dx, dy);
 	}
 
 	if (touches.length > 0) {
@@ -722,7 +720,7 @@ function mouseWheel(event) {
 }
 
 function touchStarted() {
-	isTouching = true;
+	is_touching = true;
 	if (touches.length > 0) {
 		last_touchX = touches[0].x;
 		last_touchY = touches[0].y;
@@ -731,7 +729,7 @@ function touchStarted() {
 
 function touchEnded() {
 	let should_continue = true;
-	isTouching = false;
+	is_touching = false;
 	tabs.forEach(tab => {
 		if (tab.is_hovered()) {
 			tab.clicked();
@@ -898,69 +896,6 @@ function zoom_out() {
 	}
 }
 
-function go_to_carrier_open() {
-	state = 'carrier-open-front';
-	tabs.forEach(tab => {
-		tab.state = 'default';
-	});
-	tab_open.state = 'selected';
-	card_left_rotateY = 0.05*PI;
-	card_right_rotateY = -0.05*PI;
-	card_bottom_rotateX = 0.2*PI;
-	cam.setPosition(0, 0, 800);
-	cam.lookAt(0, 0, 0);
-	cam_angle = 0.5*PI;
-	target_eyeZ = 800;
-}
-
-function go_to_carrier_closed() {
-	state = 'carrier-closed-front';
-	tabs.forEach(tab => {
-		tab.state = 'default';
-	});
-	tab_closed.state = 'selected';
-	card_left_rotateY = PI;
-	card_right_rotateY = -PI;
-	card_bottom_rotateX = 0.99*PI;
-	cam.setPosition(0, 0, 800);
-	cam.lookAt(0, 0, 0);
-	cam_angle = 0.5*PI;
-	target_eyeZ = 800;
-}
-
-function go_to_ticket() {
-	state = 'ticket-front';
-	tabs.forEach(tab => {
-		tab.state = 'default';
-	});
-	tab_ticket.state = 'selected';
-	ticket_y = 0;
-	ticket_z = 0;
-	ticket_rotateX = 0;
-	ticket_opacity = 255;
-	cam.setPosition(0, 0, 800);
-	cam.lookAt(0, 0, 0);
-	cam_angle = 0.5*PI;
-	target_eyeZ = 800;
-}
-
-function go_to_receipt() {
-	state = 'receipt';
-	tabs.forEach(tab => {
-		tab.state = 'default';
-	});
-	tab_receipt.state = 'selected';
-	receipt_y = 0;
-	receipt_z = 0;
-	receipt_opacity = 255;
-	receipt_top_rotateZ = 0;
-	receipt_bottom_rotateX = 0.1*PI;
-	cam.setPosition(0, 0, 800);
-	cam.lookAt(0, 0, 0);
-	cam_angle = 0.5*PI;
-	target_eyeZ = 800;
-}
-
 class Button {
 	constructor(img, inX, inY, inWidth, inHeight, opacity) {
 		this.x = inX;
@@ -1053,4 +988,67 @@ class Tab {
 	clicked() {
 		this.go_to();
 	}
+}
+
+function go_to_carrier_open() {
+	state = 'carrier-open-front';
+	tabs.forEach(tab => {
+		tab.state = 'default';
+	});
+	tab_open.state = 'selected';
+	card_left_rotateY = 0.05*PI;
+	card_right_rotateY = -0.05*PI;
+	card_bottom_rotateX = 0.2*PI;
+	cam.setPosition(0, 0, 800);
+	cam.lookAt(0, 0, 0);
+	cam_angle = 0.5*PI;
+	target_eyeZ = 800;
+}
+
+function go_to_carrier_closed() {
+	state = 'carrier-closed-front';
+	tabs.forEach(tab => {
+		tab.state = 'default';
+	});
+	tab_closed.state = 'selected';
+	card_left_rotateY = PI;
+	card_right_rotateY = -PI;
+	card_bottom_rotateX = 0.99*PI;
+	cam.setPosition(0, 0, 800);
+	cam.lookAt(0, 0, 0);
+	cam_angle = 0.5*PI;
+	target_eyeZ = 800;
+}
+
+function go_to_ticket() {
+	state = 'ticket-front';
+	tabs.forEach(tab => {
+		tab.state = 'default';
+	});
+	tab_ticket.state = 'selected';
+	ticket_y = 0;
+	ticket_z = 0;
+	ticket_rotateX = 0;
+	ticket_opacity = 255;
+	cam.setPosition(0, 0, 800);
+	cam.lookAt(0, 0, 0);
+	cam_angle = 0.5*PI;
+	target_eyeZ = 800;
+}
+
+function go_to_receipt() {
+	state = 'receipt';
+	tabs.forEach(tab => {
+		tab.state = 'default';
+	});
+	tab_receipt.state = 'selected';
+	receipt_y = 0;
+	receipt_z = 0;
+	receipt_opacity = 255;
+	receipt_top_rotateZ = 0;
+	receipt_bottom_rotateX = 0.1*PI;
+	cam.setPosition(0, 0, 800);
+	cam.lookAt(0, 0, 0);
+	cam_angle = 0.5*PI;
+	target_eyeZ = 800;
 }
