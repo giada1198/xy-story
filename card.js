@@ -295,29 +295,31 @@ function draw() {
 		let w_ticket = (is_mobile) ? width*(450/1020) : ticket_front_img.width/dpi_multiple;
 		let h_ticket = (is_mobile) ? w_ticket*(ticket_front_img.height/ticket_front_img.width) : ticket_front_img.height/dpi_multiple;
 
-		// ticket front
-		canvas_3d.push();
-		canvas_3d.tint(255, 255, 255, ticket_opacity);
-		canvas_3d.texture(ticket_front_img);
-		canvas_3d.beginShape();
-		canvas_3d.vertex(-w_ticket/2, -h_ticket/2+ticket_y, ticket_z, 0, 0);                         									// Top left corner
-		canvas_3d.vertex(w_ticket/2, -h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, 0);               				// Top right corner
-		canvas_3d.vertex(w_ticket/2, h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, ticket_front_img.height);	// Bottom right corner
-		canvas_3d.vertex(-w_ticket/2, h_ticket/2+ticket_y, ticket_z, 0, ticket_front_img.height);          				    // Bottom left corner
-		// canvas_3d.rotateX(ticket_rotateX);
-		canvas_3d.endShape(CLOSE);
-		canvas_3d.pop();
+		if (!['ticket-back', 'ticket-back-to-front-reset'].includes(state)) {
+			// ticket front
+			canvas_3d.push();
+			canvas_3d.tint(255, 255, 255, ticket_opacity);
+			canvas_3d.texture(ticket_front_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(-w_ticket/2, -h_ticket/2+ticket_y, ticket_z, 0, 0);
+			canvas_3d.vertex(w_ticket/2, -h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, 0);
+			canvas_3d.vertex(w_ticket/2, h_ticket/2+ticket_y, ticket_z, ticket_front_img.width, ticket_front_img.height);
+			canvas_3d.vertex(-w_ticket/2, h_ticket/2+ticket_y, ticket_z, 0, ticket_front_img.height);
+			// canvas_3d.rotateX(ticket_rotateX);
+			canvas_3d.endShape(CLOSE);
+			canvas_3d.pop();
+		}
 
 		// ticket back
 		if (['ticket-front-to-back', 'ticket-back', 'ticket-back-to-front-reset', 'ticket-back-to-front'].includes(state)) {
 			canvas_3d.push();
-			canvas_3d.tint(255, 255, 255, ticket_opacity);
+			// canvas_3d.tint(255, 255, 255, ticket_opacity);
 			canvas_3d.texture(ticket_back_img);
 			canvas_3d.beginShape();
-			canvas_3d.vertex(w_ticket/2, -h_ticket/2, -0.01, 0, 0);
-			canvas_3d.vertex(-w_ticket/2, -h_ticket/2, -0.01, ticket_back_img.width, 0);
-			canvas_3d.vertex(-w_ticket/2, h_ticket/2, -0.01, ticket_back_img.width, ticket_back_img.height);
-			canvas_3d.vertex(w_ticket/2, h_ticket/2, -0.01, 0, ticket_back_img.height);
+			canvas_3d.vertex(w_ticket/2, -h_ticket/2, ticket_z-0.01, 0, 0);
+			canvas_3d.vertex(-w_ticket/2, -h_ticket/2, ticket_z-0.01, ticket_back_img.width, 0);
+			canvas_3d.vertex(-w_ticket/2, h_ticket/2, ticket_z-0.01, ticket_back_img.width, ticket_back_img.height);
+			canvas_3d.vertex(w_ticket/2, h_ticket/2, ticket_z-0.01, 0, ticket_back_img.height);
 			canvas_3d.endShape(CLOSE);
 			canvas_3d.pop();
 		}
@@ -411,9 +413,10 @@ function draw() {
 			state = 'ticket-out';
 		}
 	} else if (state === 'ticket-out') {
+		console.log(ticket_opacity);
 		if (ticket_opacity <= 0 || ticket_y <= -1000*scale) {
 			ticket_y = -1000*scale;
-			ticket_opacity -= 0;
+			ticket_opacity = 0;
 			state = 'receipt-rise';
 		} else {
 			ticket_y -= 10*scale;
@@ -438,7 +441,7 @@ function draw() {
 	} else if (state === 'receipt-unfold-out') {
 		if (receipt_opacity <= 0 || receipt_y <= -1000*scale) {
 			receipt_y = -1000*scale;
-			ticket_opacity -= 0;
+			ticket_opacity = 0;
 			state = 'carrier-open-front';
 			tabs.forEach(tab => {
 				tab.state = 'default';
@@ -509,10 +512,10 @@ function draw() {
 	} else if (state === 'carrier-closed-front') {
 		move_camera_eyeZ();
 	} else if (state === 'carrier-closed-front-to-back-reset') {
-		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800)) {
+		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 400)) {
 			state = 'carrier-closed-front-to-back';
-			cam.setPosition(0, 0, 800);
-			target_eyeZ = -800;
+			cam.setPosition(0, 0, 400);
+			target_eyeZ = -400;
 		} else {
 			card_opacity = Math.max(0, card_opacity-25);
 		}
@@ -520,12 +523,12 @@ function draw() {
 		let a = (cam_angle+0.01*PI)%(2*PI);
 		if (card_opacity === 255 && a > 1.5*PI) {
 			cam_angle = 1.5*PI;
-			cam.setPosition(0, 0, -800);
+			cam.setPosition(0, 0, -400);
 			state = 'carrier-closed-back';
 		} else {
 			cam_angle = a;
-			let ax = 800*cos(cam_angle);
-			let az = 800*sin(cam_angle);
+			let ax = 400*cos(cam_angle);
+			let az = 400*sin(cam_angle);
 			cam.setPosition(ax, 0, az);
 			card_opacity = Math.min(255, card_opacity+3);
 		}
@@ -533,10 +536,10 @@ function draw() {
 	} else if (state === 'carrier-closed-back') {
 		move_camera_eyeZ();
 	} else if (state === 'carrier-closed-back-to-front-reset') {
-		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === -800)) {
+		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === -400)) {
 			state = 'carrier-closed-back-to-front';
-			cam.setPosition(0, 0, -800);
-			target_eyeZ = 800;
+			cam.setPosition(0, 0, -400);
+			target_eyeZ = 400;
 		} else {
 			card_opacity = Math.max(0, card_opacity-25);
 		}
@@ -544,12 +547,12 @@ function draw() {
 		let a = (cam_angle+0.01*PI)%(2*PI);
 		if (card_opacity === 255 && a >= 0.5*PI && a <= 0.6*PI) {
 			cam_angle = 0.5*PI;
-			cam.setPosition(0, 0, 800);
+			cam.setPosition(0, 0, 400);
 			state = 'carrier-closed-front';
 		} else {
 			cam_angle = a;
-			let ax = 800*cos(cam_angle);
-			let az = 800*sin(cam_angle);
+			let ax = 400*cos(cam_angle);
+			let az = 400*sin(cam_angle);
 			cam.setPosition(ax, 0, az);
 			card_opacity = Math.min(255, card_opacity+3);
 		}
@@ -557,49 +560,49 @@ function draw() {
 	} else if (state === 'ticket-front') {
 		move_camera_eyeZ();
 	} else if (state === 'ticket-front-to-back-reset') {
-		if (ticket_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 800)) {
+		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === 400)) {
 			state = 'ticket-front-to-back';
-			cam.setPosition(0, 0, 800);
-			target_eyeZ = -800;
+			cam.setPosition(0, 0, 400);
+			target_eyeZ = -400;
 		} else {
-			ticket_opacity = Math.max(0, ticket_opacity-25);
+			card_opacity = Math.max(0, card_opacity-25);
 		}
 	} else if (state === 'ticket-front-to-back') {
 		let a = (cam_angle+0.01*PI)%(2*PI);
-		if (ticket_opacity === 255 && a > 1.5*PI) {
+		if (card_opacity === 255 && a > 1.5*PI) {
 			cam_angle = 1.5*PI;
-			cam.setPosition(0, 0, -800);
+			cam.setPosition(0, 0, -400);
 			state = 'ticket-back';
 		} else {
 			cam_angle = a;
-			let ax = 800*cos(cam_angle);
-			let az = 800*sin(cam_angle);
+			let ax = 400*cos(cam_angle);
+			let az = 400*sin(cam_angle);
 			cam.setPosition(ax, 0, az);
-			ticket_opacity = Math.min(255, ticket_opacity+3);
+			card_opacity = Math.min(255, card_opacity+3);
 		}
 		cam.lookAt(0, 0, 0);
 	} else if (state === 'ticket-back') {
 		move_camera_eyeZ();
 	} else if (state === 'ticket-back-to-front-reset') {
-		if (ticket_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === -800)) {
+		if (card_opacity === 0 || (cam.eyeX === 0 && cam.eyeY === 0 && cam.eyeZ === -400)) {
 			state = 'ticket-back-to-front';
-			cam.setPosition(0, 0, -800);
-			target_eyeZ = 800;
+			cam.setPosition(0, 0, -400);
+			target_eyeZ = 400;
 		} else {
-			ticket_opacity = Math.max(0, ticket_opacity-25);
+			card_opacity = Math.max(0, card_opacity-25);
 		}
 	} else if (state === 'ticket-back-to-front') {
 		let a = (cam_angle+0.01*PI)%(2*PI);
-		if (ticket_opacity === 255 && a >= 0.5*PI && a <= 0.6*PI) {
+		if (card_opacity === 255 && a >= 0.5*PI && a <= 0.6*PI) {
 			cam_angle = 0.5*PI;
-			cam.setPosition(0, 0, 800);
+			cam.setPosition(0, 0, 400);
 			state = 'ticket-front';
 		} else {
 			cam_angle = a;
-			let ax = 800*cos(cam_angle);
-			let az = 800*sin(cam_angle);
+			let ax = 400*cos(cam_angle);
+			let az = 400*sin(cam_angle);
 			cam.setPosition(ax, 0, az);
-			ticket_opacity = Math.min(255, ticket_opacity+3);
+			card_opacity = Math.min(255, card_opacity+3);
 		}
 		cam.lookAt(0, 0, 0);
 	} else if (state === 'receipt') {
@@ -684,16 +687,16 @@ function mousePressed() {
 			target_eyeZ = -800;
 		} else if (state === 'carrier-closed-front') {
 			state = 'carrier-closed-front-to-back-reset';
-			target_eyeZ = 800;
+			target_eyeZ = 400;
 		} else if (state === 'carrier-closed-back') {
 			state = 'carrier-closed-back-to-front-reset';
-			target_eyeZ = -800;
+			target_eyeZ = -400;
 		} else if (state === 'ticket-front') {
 			state = 'ticket-front-to-back-reset';
-			target_eyeZ = 800;
+			target_eyeZ = 400;
 		} else if (state === 'ticket-back') {
 			state = 'ticket-back-to-front-reset';
-			target_eyeZ = -800;
+			target_eyeZ = -400;
 		}
 	} else {
 		isDragging = true;
@@ -766,16 +769,16 @@ function touchEnded() {
 			target_eyeZ = -800;
 		} else if (state === 'carrier-closed-front') {
 			state = 'carrier-closed-front-to-back-reset';
-			target_eyeZ = 800;
+			target_eyeZ = 400;
 		} else if (state === 'carrier-closed-back') {
 			state = 'carrier-closed-back-to-front-reset';
-			target_eyeZ = -800;
+			target_eyeZ = -400;
 		} else if (state === 'ticket-front') {
 			state = 'ticket-front-to-back-reset';
-			target_eyeZ = 800;
+			target_eyeZ = 400;
 		} else if (state === 'ticket-back') {
 			state = 'ticket-back-to-front-reset';
-			target_eyeZ = -800;
+			target_eyeZ = -400;
 		}
 	}
 }
@@ -860,9 +863,9 @@ function windowResized() {
 	tab_receipt.position(x, y);
 
 	// reposition receipt
-	if (state === 'receipt') {
-		receipt_y = -180*scale;
-	}
+	// if (state === 'receipt') {
+	// 	receipt_y = -180*scale;
+	// }
 }
 
 function zoom_in() {
@@ -1016,6 +1019,7 @@ function go_to_carrier_open() {
 	card_left_rotateY = 0.05*PI;
 	card_right_rotateY = -0.05*PI;
 	card_bottom_rotateX = 0.2*PI;
+	card_opacity = 255;
 	cam.setPosition(0, 0, 800);
 	cam.lookAt(0, 0, 0);
 	cam_angle = 0.5*PI;
@@ -1031,10 +1035,11 @@ function go_to_carrier_closed() {
 	card_left_rotateY = PI;
 	card_right_rotateY = -PI;
 	card_bottom_rotateX = 0.99*PI;
-	cam.setPosition(0, 0, 800);
+	card_opacity = 255;
+	cam.setPosition(0, 0, 400);
 	cam.lookAt(0, 0, 0);
 	cam_angle = 0.5*PI;
-	target_eyeZ = 800;
+	target_eyeZ = 400;
 }
 
 function go_to_ticket() {
@@ -1047,10 +1052,11 @@ function go_to_ticket() {
 	ticket_z = 0;
 	ticket_rotateX = 0;
 	ticket_opacity = 255;
-	cam.setPosition(0, 0, 800);
+	card_opacity = 255;
+	cam.setPosition(0, 0, 400);
 	cam.lookAt(0, 0, 0);
 	cam_angle = 0.5*PI;
-	target_eyeZ = 800;
+	target_eyeZ = 400;
 }
 
 function go_to_receipt() {
@@ -1059,13 +1065,15 @@ function go_to_receipt() {
 		tab.state = 'default';
 	});
 	tab_receipt.state = 'selected';
-	receipt_y = -180*scale;
+	// receipt_y = -180*scale;
+	receipt_y = 0;
 	receipt_z = 0;
 	receipt_opacity = 255;
 	receipt_top_rotateZ = 0;
 	receipt_bottom_rotateX = 0.1*PI;
-	cam.setPosition(0, 0, 800);
+	card_opacity = 255;
+	cam.setPosition(0, 0, 400);
 	cam.lookAt(0, 0, 0);
 	cam_angle = 0.5*PI;
-	target_eyeZ = 800;
+	target_eyeZ = 400;
 }
