@@ -358,38 +358,6 @@ function draw() {
 		}
 	}
 
-	if (isDragging) {
-		let n = Math.abs(cam.eyeZ);
-		let dx = (mouseX-lastX)*(n/800);
-		let dy = (mouseY-lastY)*(n/800);
-		// adjust camera based on touch drag
-		let eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
-		let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
-		cam.setPosition(eyeX, eyeY, cam.eyeZ);
-		// cam.move(-dx*(d/800), -dy*(d/800), 0);
-		console.log('drag', eyeX, eyeY);
-	}
-	lastX = mouseX;
-	lastY = mouseY;
-
-	if (is_touching && touches.length > 0) {
-		let n = Math.abs(cam.eyeZ);
-		let dx = (touches[0].x-last_touchX)*(n/800);
-		let dy = (touches[0].y-last_touchY)*(n/800);
-		// adjust camera based on touch drag
-		let eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
-		let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
-		cam.setPosition(eyeX, eyeY, cam.eyeZ);
-		// cam.move(-dx, -dy, 0);
-		console.log('touch', eyeX, eyeY);
-		console.log(scale);
-	}
-
-	if (touches.length > 0) {
-		last_touchX = touches[0].x;
-		last_touchY = touches[0].y;
-	}
-
 	push();
 	tint(255, 255, 255, card_opacity);
 	image(canvas_3d, 0, 0);
@@ -637,6 +605,40 @@ function draw() {
 		move_camera_eyeZ();
 	}
 
+	if (['carrier-open-front', 'carrier-open-back', 'carrier-closed-front', 'carrier-closed-back', 'ticket-front', 'ticket-back', 'receipt'].includes(state)) {
+		if (isDragging) {
+			let n = Math.abs(cam.eyeZ);
+			let dx = (mouseX-lastX)*(n/800);
+			let dy = (mouseY-lastY)*(n/800);
+			// adjust camera based on touch drag
+			let eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
+			let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
+			cam.setPosition(eyeX, eyeY, cam.eyeZ);
+			// cam.move(-dx*(d/800), -dy*(d/800), 0);
+			console.log('drag', eyeX, eyeY);
+		}
+		lastX = mouseX;
+		lastY = mouseY;
+	
+		if (is_touching && touches.length > 0) {
+			let n = Math.abs(cam.eyeZ);
+			let dx = (touches[0].x-last_touchX)*(n/800);
+			let dy = (touches[0].y-last_touchY)*(n/800);
+			// adjust camera based on touch drag
+			let eyeX = Math.min(Math.max(cam.eyeX-dx, -510*scale), 510*scale);
+			let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
+			cam.setPosition(eyeX, eyeY, cam.eyeZ);
+			// cam.move(-dx, -dy, 0);
+			console.log('touch', eyeX, eyeY);
+			console.log(scale);
+		}
+	
+		if (touches.length > 0) {
+			last_touchX = touches[0].x;
+			last_touchY = touches[0].y;
+		}
+	}
+	
 	// cursor
 	if (zoom_in_button.is_hovered() || zoom_out_button.is_hovered() || rotate_button.is_hovered()) {
 		cursor('pointer');
