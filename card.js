@@ -621,7 +621,7 @@ function draw() {
 			} else if (['carrier-open-back', 'carrier-closed-back', 'ticket-back'].includes(state)) {
 				eyeX = Math.min(Math.max(cam.eyeX+dx, -510*scale), 510*scale);
 			}
-			let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
+			let eyeY = Math.min(Math.max(cam.eyeY-dy, -280*scale), 400*scale);
 			cam.setPosition(eyeX, eyeY, cam.eyeZ);
 			// cam.move(-dx*(d/800), -dy*(d/800), 0);
 			console.log('drag', eyeX, eyeY);
@@ -640,7 +640,7 @@ function draw() {
 			} else if (['carrier-open-back', 'carrier-closed-back', 'ticket-back'].includes(state)) {
 				eyeX = Math.min(Math.max(cam.eyeX+dx, -510*scale), 510*scale);
 			}
-			let eyeY = Math.min(Math.max(cam.eyeY-dy, -400*scale), 400*scale);
+			let eyeY = Math.min(Math.max(cam.eyeY-dy, -280*scale), 400*scale);
 			cam.setPosition(eyeX, eyeY, cam.eyeZ);
 			// cam.move(-dx, -dy, 0);
 			console.log('touch', eyeX, eyeY);
@@ -863,9 +863,9 @@ function windowResized() {
 	tab_receipt.position(x, y);
 
 	// reposition receipt
-	// if (state === 'receipt') {
-	// 	receipt_y = -180*scale;
-	// }
+	if (state === 'receipt') {
+		receipt_y = -60*scale;
+	}
 }
 
 function zoom_in() {
@@ -1065,15 +1065,15 @@ function go_to_receipt() {
 		tab.state = 'default';
 	});
 	tab_receipt.state = 'selected';
-	// receipt_y = -180*scale;
+	receipt_y = -60*scale;
 	receipt_y = 0;
 	receipt_z = 0;
 	receipt_opacity = 255;
 	receipt_top_rotateZ = 0;
 	receipt_bottom_rotateX = 0.1*PI;
 	card_opacity = 255;
-	cam.setPosition(0, 0, 400);
+	cam.setPosition(0, 0, 600);
 	cam.lookAt(0, 0, 0);
 	cam_angle = 0.5*PI;
-	target_eyeZ = 400;
+	target_eyeZ = 600;
 }
