@@ -17,6 +17,7 @@ let receipt_y, receipt_z, receipt_opacity, receipt_top_rotateZ, receipt_bottom_r
 let zoom_in_button, zoom_in_button_img;
 let zoom_out_button, zoom_out_button_img;
 let rotate_button, rotate_button_img;
+let reopen_button, reopen_button_img;
 
 let tab_ticket, tab_ticket_img, tab_ticket_selected_img;
 let tab_open, tab_open_img, tab_open_selected_img;
@@ -69,6 +70,7 @@ function preload() {
 	zoom_in_button_img = loadImage('assets/card/button-zoom-in.png');
 	zoom_out_button_img = loadImage('assets/card/button-zoom-out.png');
 	rotate_button_img = loadImage('assets/card/button-rotate.png');
+	reopen_button_img = loadImage('assets/card/button-reopen.png');
 	// tabs
 	tab_ticket_img = loadImage('assets/card/tab-ticket-default.png');
 	tab_ticket_selected_img = loadImage('assets/card/tab-ticket-selected.png');
@@ -129,11 +131,18 @@ function setup() {
 	x = w-ui_padding-bw;
 	zoom_out_button = new Button(zoom_out_button_img, x, y, bw, bh, 255);
 
+	// reopen button
+	bw = reopen_button_img.width/dpi_multiple;
+	bh = reopen_button_img.height/dpi_multiple;
+	x = ui_padding;
+	y = ui_padding;
+	reopen_button = new Button(reopen_button_img, x, y, bw, bh, 255);
+
 	// rotate button
+	y = ui_padding + bh + ui_spacing;
 	bw = rotate_button_img.width/dpi_multiple;
 	bh = rotate_button_img.height/dpi_multiple;
 	x = ui_padding;
-	y = ui_padding;
 	rotate_button = new Button(rotate_button_img, x, y, bw, bh, 255);
 
 	// tab: open
@@ -410,6 +419,7 @@ function draw() {
 		// draw buttons
 		zoom_in_button.display();
 		zoom_out_button.display();
+		reopen_button.display();
 		if (state !== 'receipt') {
 			rotate_button.display();
 		}
@@ -715,6 +725,9 @@ function mousePressed() {
 	// zoom out button
 	} else if (zoom_out_button.is_hovered()) {
 		zoom_out();
+	// reopen button
+	} else if (reopen_button.is_hovered()) {
+		reopen();
 	// rotate button
 	} else if (rotate_button.is_hovered()) {
 		if (state === 'carrier-open-front') {
@@ -797,6 +810,9 @@ function touchEnded() {
 	// zoom out button
 	} else if (zoom_out_button.is_hovered()) {
 		zoom_out();
+	// zoom out button
+	} else if (reopen_button.is_hovered()) {
+		reopen();
 	// rotate button
 	} else if (rotate_button.is_hovered()) {
 		if (state === 'carrier-open-front') {
@@ -882,7 +898,9 @@ function windowResized() {
 	let bh = zoom_in_button_img.height/dpi_multiple;
 	zoom_in_button.position(w-ui_padding-bw, ui_padding);
 	zoom_out_button.position(w-ui_padding-bw, ui_padding+bh+ui_spacing);
-	rotate_button.position(ui_padding, ui_padding);
+	bh = reopen_button_img.height/dpi_multiple;
+	reopen_button.position(ui_padding, ui_padding);
+	rotate_button.position(ui_padding, ui_padding+bh+ui_spacing);
 
 	// reposition tabs
 	bw = tab_ticket_img.width/dpi_multiple;
@@ -1114,4 +1132,8 @@ function go_to_receipt() {
 	cam.lookAt(0, 0, 0);
 	cam_angle = 0.5*PI;
 	target_eyeZ = 600;
+}
+
+function reopen() {
+	location.reload();
 }
