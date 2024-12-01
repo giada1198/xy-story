@@ -1,4 +1,4 @@
-let state = 'init';
+let state = 'super-init';
 let language = 'tc';
 let is_mobile;
 
@@ -25,6 +25,11 @@ let next_button_mobile, next_button_mobile_img, next_button_mobile_en_img;
 const next_button_mobile_img_w = 240;
 const next_button_mobile_img_h = 43;
 const next_button_mobile_y_offset = 134;
+
+let link_invitation, link_invitation_img;
+let link_letter, link_letter_img;
+const link_img_w = 300;
+const link_img_h = 120;
 
 const survey_link = 'https://forms.gle/AvYd9YZ7U9vqC8Vx5';
 
@@ -60,6 +65,10 @@ function preload() {
 	next_button_desktop_en_img = loadImage('assets/next-button-desktop-en.png');
 	next_button_mobile_img = loadImage('assets/next-button-mobile.png');
 	next_button_mobile_en_img = loadImage('assets/next-button-mobile-en.png');
+
+	// link
+	link_invitation_img = loadImage('assets/link-invitation.png');
+	link_letter_img = loadImage('assets/link-letter.png');
 }
 
 function setup() {
@@ -99,6 +108,18 @@ function setup() {
 	x = w/2-button_w/2;
 	y = h/2+next_button_mobile_y_offset*scale;
 	next_button_mobile = new Button(next_button_mobile_img, next_button_mobile_en_img, x, y, button_w, button_h);
+
+	// create link to invitation
+	x = w/2 - link_img_w/2;
+	y = h/2 - 10 - link_img_h;
+	link_invitation = new Button(link_invitation_img, link_invitation_img, x, y, link_img_w, link_img_h);
+	link_invitation.opacity = 255;
+
+	// create link to letter
+	x = w/2 - link_img_w/2;
+	y = h/2 + 10;
+	link_letter = new Button(link_letter_img, link_letter_img, x, y, link_img_w, link_img_h);
+	link_letter.opacity = 255;
 }
 
 function draw() {
@@ -231,7 +252,16 @@ function draw() {
 		canvas_3d.pop();
 	}
 
-	if (state === 'init') {
+
+	if (state === 'super-init') {
+		link_invitation.display();
+		link_letter.display();
+		if (link_invitation.is_hovered() || link_letter.is_hovered()) {
+			cursor('pointer');
+		} else {
+			cursor('default');
+		}
+	} if (state === 'init') {
 		language_button_tc.display();
 		language_button_en.display();
 		language_button_tc.opacity += 10;
@@ -319,6 +349,11 @@ function touchEnded() {
 		cursor('default');
 	} else if (state === 'back' && (next_button_desktop.is_hovered() || next_button_mobile.is_hovered())) {
 		window.open(survey_link);
+	} else if (state === 'super-init' && link_invitation.is_hovered()) {
+		window.location.href = '/invitation.html';
+	} else if (state === 'super-init' && link_letter.is_hovered()) {
+		state = 'init'
+		cursor('default');
 	}
 }
 
@@ -336,6 +371,10 @@ function windowResized() {
 	// reposition language buttons
 	language_button_tc.position(w/2-language_button_tc_img_w, h/2-language_button_tc_img_h/2);
 	language_button_en.position(w/2, h/2-language_button_en_img_h/2);
+
+	// reposition links
+	link_invitation.position(w/2-link_img_w/2, h/2-10-link_img_h);
+	link_letter.position(w/2-link_img_w/2, h/2+10);
 
 	resizeCanvas(w, h);
 	canvas_3d.resizeCanvas(w, h);
