@@ -1,7 +1,7 @@
 let state = 'init';
 let is_mobile;
 
-let canvas_3d;
+let canvas_3d, canvas_3d_gl;
 let cam;
 
 let card_inner_left_img, card_inner_center_img, card_inner_right_img, card_inner_bottom_img;
@@ -86,9 +86,13 @@ function setup() {
 	let w = Math.max(320, windowWidth);
 	let h = Math.max(240, windowHeight);
 	scale = w/1020;
+	frameRate(60);
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
 	canvas_3d.noStroke();
+	canvas_3d_gl = canvas_3d._renderer.GL;
+	// canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE);
+
 	cam = canvas_3d.createCamera();
 	cam.setPosition(0, -300, 800);
 	cam_angle = 0.5*PI;
@@ -181,20 +185,27 @@ function draw() {
 		let w = (is_mobile) ? width*(255/1020) : card_inner_left_img.width/dpi_multiple;
 		let h = (is_mobile) ? w*(card_inner_left_img.height/card_inner_left_img.width) : card_inner_left_img.height/dpi_multiple;
 
-		// card left inner
-		canvas_3d.push();
-		canvas_3d.texture(card_inner_left_img);
-		canvas_3d.beginShape();
-		canvas_3d.vertex(-w, -h/2, -0.04, 0, 0);                         						// Top left corner
-		canvas_3d.vertex(0, -h/2, -0.04, card_inner_left_img.width, 0);               			// Top right corner
-		canvas_3d.vertex(0, h/2, -0.04, card_inner_left_img.width, card_inner_left_img.height);	// Bottom right corner
-		canvas_3d.vertex(-w, h/2, -0.04, 0, card_inner_left_img.height);          				// Bottom left corner
-		canvas_3d.translate(-w_center/2, 0, 0);
-		canvas_3d.rotateY(card_left_rotateY);
-		canvas_3d.endShape(CLOSE);
-		canvas_3d.pop();
+		if (!['carrier-closed-front', 'carrier-closed-front-to-back', 'carrier-closed-back', 'carrier-closed-back-to-front'].includes(state)) {
+			// card left inner
+			canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+			canvas_3d_gl.cullFace(canvas_3d_gl.FRONT);
+			canvas_3d.push();
+			canvas_3d.texture(card_inner_left_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(-w, -h/2, -0.04, 0, 0);                         						// Top left corner
+			canvas_3d.vertex(0, -h/2, -0.04, card_inner_left_img.width, 0);               			// Top right corner
+			canvas_3d.vertex(0, h/2, -0.04, card_inner_left_img.width, card_inner_left_img.height);	// Bottom right corner
+			canvas_3d.vertex(-w, h/2, -0.04, 0, card_inner_left_img.height);          				// Bottom left corner
+			canvas_3d.translate(-w_center/2, 0, 0);
+			canvas_3d.rotateY(card_left_rotateY);
+			canvas_3d.endShape(CLOSE);
+			canvas_3d.pop();
+			canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
+		}
 
 		// card left outer
+		canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+		canvas_3d_gl.cullFace(canvas_3d_gl.BACK);
 		canvas_3d.push();
 		canvas_3d.texture(card_outer_left_img);
 		canvas_3d.beginShape();
@@ -206,25 +217,33 @@ function draw() {
 		canvas_3d.rotateY(card_left_rotateY);
 		canvas_3d.endShape(CLOSE);
 		canvas_3d.pop();
+		canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 
 		// card left dimensions
 		w = (is_mobile) ? width*(255/1020) : card_inner_right_img.width/dpi_multiple;
 		h = (is_mobile) ? w*(card_inner_right_img.height/card_inner_right_img.width) : card_inner_right_img.height/dpi_multiple;
 
-		// card right inner
-		canvas_3d.push();
-		canvas_3d.texture(card_inner_right_img);
-		canvas_3d.beginShape();
-		canvas_3d.vertex(0, -h/2, -0.04, 0, 0);                         							// Top left corner
-		canvas_3d.vertex(w, -h/2, -0.04, card_inner_right_img.width, 0);               				// Top right corner
-		canvas_3d.vertex(w, h/2, -0.04, card_inner_right_img.width, card_inner_right_img.height);	// Bottom right corner
-		canvas_3d.vertex(0, h/2, -0.04, 0, card_inner_right_img.height);          				    // Bottom left corner
-		canvas_3d.translate(w_center/2, 0, 0);
-		canvas_3d.rotateY(card_right_rotateY);
-		canvas_3d.endShape(CLOSE);
-		canvas_3d.pop();
+		if (!['carrier-closed-front', 'carrier-closed-front-to-back', 'carrier-closed-back', 'carrier-closed-back-to-front'].includes(state)) {
+			// card right inner
+			canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+			canvas_3d_gl.cullFace(canvas_3d_gl.FRONT);
+			canvas_3d.push();
+			canvas_3d.texture(card_inner_right_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(0, -h/2, -0.04, 0, 0);                         							// Top left corner
+			canvas_3d.vertex(w, -h/2, -0.04, card_inner_right_img.width, 0);               				// Top right corner
+			canvas_3d.vertex(w, h/2, -0.04, card_inner_right_img.width, card_inner_right_img.height);	// Bottom right corner
+			canvas_3d.vertex(0, h/2, -0.04, 0, card_inner_right_img.height);          				    // Bottom left corner
+			canvas_3d.translate(w_center/2, 0, 0);
+			canvas_3d.rotateY(card_right_rotateY);
+			canvas_3d.endShape(CLOSE);
+			canvas_3d.pop();
+			canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
+		}
 
 		// card right outer
+		canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+		canvas_3d_gl.cullFace(canvas_3d_gl.BACK);
 		canvas_3d.push();
 		canvas_3d.texture(card_outer_right_img);
 		canvas_3d.beginShape();
@@ -236,19 +255,27 @@ function draw() {
 		canvas_3d.rotateY(card_right_rotateY);
 		canvas_3d.endShape(CLOSE);
 		canvas_3d.pop();
+		canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 
-		// card center inner
-		canvas_3d.push();
-		canvas_3d.texture(card_inner_center_img);
-		canvas_3d.beginShape();
-		canvas_3d.vertex(-w_center/2, -h_center/2, -0.05, 0, 0);                         									// Top left corner
-		canvas_3d.vertex(w_center/2, -h_center/2, -0.05, card_inner_center_img.width, 0);               				// Top right corner
-		canvas_3d.vertex(w_center/2, h_center/2, -0.05, card_inner_center_img.width, card_inner_center_img.height);	// Bottom right corner
-		canvas_3d.vertex(-w_center/2, h_center/2, -0.05, 0, card_inner_center_img.height);          				    // Bottom left corner
-		canvas_3d.endShape(CLOSE);
-		canvas_3d.pop();
+		if (!['carrier-closed-front', 'carrier-closed-front-to-back', 'carrier-closed-back', 'carrier-closed-back-to-front'].includes(state)) {
+			// card center inner
+			canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+			canvas_3d_gl.cullFace(canvas_3d_gl.FRONT);
+			canvas_3d.push();
+			canvas_3d.texture(card_inner_center_img);
+			canvas_3d.beginShape();
+			canvas_3d.vertex(-w_center/2, -h_center/2, -0.05, 0, 0);                         									// Top left corner
+			canvas_3d.vertex(w_center/2, -h_center/2, -0.05, card_inner_center_img.width, 0);               				// Top right corner
+			canvas_3d.vertex(w_center/2, h_center/2, -0.05, card_inner_center_img.width, card_inner_center_img.height);	// Bottom right corner
+			canvas_3d.vertex(-w_center/2, h_center/2, -0.05, 0, card_inner_center_img.height);          				    // Bottom left corner
+			canvas_3d.endShape(CLOSE);
+			canvas_3d.pop();
+			canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
+		}
 
 		// card center outer
+		canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+		canvas_3d_gl.cullFace(canvas_3d_gl.BACK);
 		canvas_3d.push();
 		canvas_3d.texture(card_outer_center_img);
 		canvas_3d.beginShape();
@@ -258,12 +285,15 @@ function draw() {
 		canvas_3d.vertex(w_center/2, h_center/2, -0.06, 0, card_inner_center_img.height);          				    // Bottom left corner
 		canvas_3d.endShape(CLOSE);
 		canvas_3d.pop();
+		canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 
 		// card bottom dimensions
 		let w_bottom = (is_mobile) ? width*(510/1020) : card_inner_bottom_img.width/dpi_multiple;
 		let h_bottom = (is_mobile) ? w_center*(card_inner_bottom_img.height/card_inner_bottom_img.width) : card_inner_bottom_img.height/dpi_multiple;
 
 		// card bottom inner
+		canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+		canvas_3d_gl.cullFace(canvas_3d_gl.FRONT);
 		canvas_3d.push();
 		canvas_3d.texture(card_inner_bottom_img);
 		canvas_3d.beginShape();
@@ -275,8 +305,11 @@ function draw() {
 		canvas_3d.rotateX(card_bottom_rotateX);
 		canvas_3d.endShape(CLOSE);
 		canvas_3d.pop();
+		canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 
 		// card bottom outer
+		canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+		canvas_3d_gl.cullFace(canvas_3d_gl.FRONT);
 		canvas_3d.push();
 		canvas_3d.texture(card_outer_bottom_img);
 		canvas_3d.beginShape();
@@ -288,6 +321,7 @@ function draw() {
 		canvas_3d.rotateX(card_bottom_rotateX);
 		canvas_3d.endShape(CLOSE);
 		canvas_3d.pop();
+		canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 	}
 	
 	if (['unfold-sides', 'ticket-out', 'ticket-front', 'ticket-front-to-back-reset', 'ticket-front-to-back', 'ticket-back', 'ticket-back-to-front-reset', 'ticket-back-to-front'].includes(state)) {
@@ -297,6 +331,8 @@ function draw() {
 
 		if (!['ticket-back', 'ticket-back-to-front-reset'].includes(state)) {
 			// ticket front
+			canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+			canvas_3d_gl.cullFace(canvas_3d_gl.FRONT);
 			canvas_3d.push();
 			canvas_3d.tint(255, 255, 255, ticket_opacity);
 			canvas_3d.texture(ticket_front_img);
@@ -308,10 +344,13 @@ function draw() {
 			// canvas_3d.rotateX(ticket_rotateX);
 			canvas_3d.endShape(CLOSE);
 			canvas_3d.pop();
+			canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 		}
 
 		// ticket back
 		if (['ticket-front-to-back', 'ticket-back', 'ticket-back-to-front-reset', 'ticket-back-to-front'].includes(state)) {
+			canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE); // render one side only
+			canvas_3d_gl.cullFace(canvas_3d_gl.BACK);
 			canvas_3d.push();
 			// canvas_3d.tint(255, 255, 255, ticket_opacity);
 			canvas_3d.texture(ticket_back_img);
@@ -322,6 +361,7 @@ function draw() {
 			canvas_3d.vertex(w_ticket/2, h_ticket/2, ticket_z-0.01, 0, ticket_back_img.height);
 			canvas_3d.endShape(CLOSE);
 			canvas_3d.pop();
+			canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 		}
 	}
 
@@ -418,7 +458,7 @@ function draw() {
 			ticket_opacity = 0;
 			state = 'receipt-rise';
 		} else {
-			ticket_y -= 10*scale;
+			ticket_y -= (10*scale+5)/2;
 			if (ticket_y <= -500*scale) {
 				ticket_opacity -= 5;
 			}
@@ -453,7 +493,7 @@ function draw() {
 				receipt_bottom_rotateX += 0.02*PI;
 			}
 			if (receipt_bottom_rotateX >= -0.1*PI) {
-				receipt_y -= 10*scale;
+				receipt_y -= (10*scale)/2;
 				if (receipt_y <= -500*scale) {
 					receipt_opacity -= 5;
 				}

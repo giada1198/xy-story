@@ -2,7 +2,7 @@ let state = 'init';
 let language = 'tc';
 let is_mobile;
 
-let canvas_3d;
+let canvas_3d, canvas_3d_gl;
 
 let letter_front_desktop_img, letter_back_desktop_img, letter_back_desktop_en_img;
 let letter_front_mobile_img, letter_back_mobile_img;
@@ -75,6 +75,7 @@ function setup() {
 	createCanvas(w, h);
 	canvas_3d = createGraphics(w, h, WEBGL);
 	canvas_3d.noStroke();
+	canvas_3d_gl = canvas_3d._renderer.GL;
 	
 	// create chinese language button
 	let x = w/2-language_button_tc_img_w;
@@ -133,6 +134,8 @@ function draw() {
 			}
 		}
 
+		canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE);
+		canvas_3d_gl.cullFace(canvas_3d_gl.FRONT);
 		// draw the front side of the letter
 		if (is_mobile) {
 			let w = Math.max(Math.min(500, windowWidth), 320);
@@ -155,7 +158,10 @@ function draw() {
 			canvas_3d.vertex(-w/2, h/2, 0, 0, letter_front_desktop_img.height);          				    // Bottom left corner
 			canvas_3d.endShape(CLOSE);
 		}
+		canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 
+		canvas_3d_gl.enable(canvas_3d_gl.CULL_FACE);
+		canvas_3d_gl.cullFace(canvas_3d_gl.BACK);
 		// draw the back side of the letter
 		if (is_mobile) {
 			let w = Math.max(Math.min(500, windowWidth), 320);
@@ -186,6 +192,7 @@ function draw() {
 			canvas_3d.vertex(w/2, h/2, -0.01, letter_back_desktop_img.width, 0);
 			canvas_3d.endShape(CLOSE);
 		}
+		canvas_3d_gl.disable(canvas_3d_gl.CULL_FACE);
 
 		// draw the dagger
 		let daggerOffset = 0;
