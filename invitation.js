@@ -25,7 +25,6 @@ let tab_closed, tab_closed_img, tab_closed_selected_img;
 let tab_receipt, tab_receipt_img, tab_receipt_selected_img;
 let tabs_background_img;
 
-
 let scale;
 
 let isDragging = false;
@@ -41,7 +40,6 @@ let target_eyeZ = 800;
 const default_eyeZ = 800;
 const min_eyeZ = 200;
 const max_eyeZ = 1200;
-
 
 let card_opacity = 0;
 
