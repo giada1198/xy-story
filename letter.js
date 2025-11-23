@@ -350,7 +350,7 @@ function touchEnded() {
 	} else if (state === 'back' && (next_button_desktop.is_hovered() || next_button_mobile.is_hovered())) {
 		window.open(survey_link);
 	} else if (state === 'super-init' && link_invitation.is_hovered()) {
-		window.location.href = '/invitation.html';
+		window.location.href = '/xy-story/invitation';
 	} else if (state === 'super-init' && link_letter.is_hovered()) {
 		state = 'init'
 		cursor('default');
